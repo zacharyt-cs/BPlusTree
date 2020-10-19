@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.Queue;
 
 public class BPlusTree {
-	private int m=4;// degree of the tree
-	
+	private int n=4;// degree of the tree
 	public Node root;// root of BplusTree
 	public static int counter=0;
 	
@@ -13,41 +12,48 @@ public class BPlusTree {
 	// public test() {
 	// }
 	
+	/**
+	 *  Insert (key, value) pair into tree 
+	 * */ 
 	public void insert(double key, Records values){
-		if(null== this.root){
-			// For an empty B Tree, root is created and its key is set as the
-			// newly inserted key
+		// If new tree, create root
+		if(this.root == null){
 			Node newNode = new Node();
 			newNode.getKeys().add(new Keys(key, values));
 			this.root = newNode;
-			// Since the root has no parent, parent set to null
 			this.root.setParent(null);
 		}
-		
-		else if(this.root.getChildren().isEmpty() && this.root.getKeys().size()< (this.m -1)){
+		// If node has no children && has space, insert here
+		else if((this.root.getChildren().isEmpty()) && 		// Root without children
+				this.root.getKeys().size() < (this.n-1)){	// Num of keys < n-1
 			insertWithinExternalNode(key, values, this.root);
 		}
 		
 		else{
 			Node current = this.root;
-			// tranverse to the last level since we are inserting at the external node
+			// If got children, search for children
 			while (!current.getChildren().isEmpty()) {
 				current = current.getChildren().get(binarySearchWithinInternalNode(key, current.getKeys()));
 			}
+			// 
 			insertWithinExternalNode(key, values, current);
-			if (current.getKeys().size() == this.m) {
+			if (current.getKeys().size() == this.n) {
 				// If the external node becomes full, we split it
-				splitExternalNode(current, this.m);
+				splitExternalNode(current, this.n);
 			}
 		}
-		
 	}
+
+	/**
+	 *  Insert (key, value) pair into external node
+	 * */ 
 	private void insertWithinExternalNode(double key, Records value, Node node) {
-		// A binary search is executed to find the correct place where the node
-		// is to be inserted
+		
+		//
 		int indexOfKey = binarySearchWithinInternalNode(key, node.getKeys());
+
+		// Key already exists. Add the new value to the list
 		if (indexOfKey != 0 && node.getKeys().get(indexOfKey - 1).getKey() == key) {
-			// Key already exists. Add the new value to the list
 			node.getKeys().get(indexOfKey - 1).getValues().add(value);
 		} else {
 			// Key doesn't exist. Add key and value

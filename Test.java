@@ -3,7 +3,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Main {
+public class Test {
 
     public static int counter=0;
     
@@ -81,7 +81,6 @@ public class Main {
                     for(int b=0; b<dataBlo.size();b++){
                         Records r = dataBlo.get(b);
                         System.out.println("Tconst is "+ r.tconstant + " Average Rating is "+ r.averagerating + " Number of votes is "+ r.numofvote);
-                        
                     }
                     break;
                 }

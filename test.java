@@ -13,7 +13,7 @@ import java.util.Queue;
 
 public class test {
 
-	private int m=4;// degree of the tree
+	private int m=3;// degree of the tree
 	
 	public Node root;// root of BplusTree
 	public static  int counter=0;
@@ -384,9 +384,7 @@ public class test {
 	 *            the ending key
 	 * @return the list of key value pairs between the two keys
 	 */
-	
-	public List<Records> search(double key1, double key2) {
-		List<Records> rangeData= null;
+	public List<Keys> search(double key1, double key2) {
 		//System.out.println("Searching between keys " + key1 + ", " + key2);
 		List<Keys> searchKeys = new ArrayList<>();
 		Node currNode = this.root;
@@ -403,7 +401,9 @@ public class test {
 		while (null != currNode && !endSearch) {
 			for (int i = 0; i < currNode.getKeys().size(); i++) {
 				if (currNode.getKeys().get(i).getKey() >= key1 && currNode.getKeys().get(i).getKey() <= key2)
-					searchKeys.add(currNode.getKeys().get(i));
+					
+					searchKeys.add((currNode.getKeys().get(i)));
+				
 				if (currNode.getKeys().get(i).getKey() > key2) {
 					endSearch = true;
 				}
@@ -411,8 +411,10 @@ public class test {
 			currNode = currNode.getNext();
 		}
 
-		return rangeData;
+		return searchKeys;
 	}
+
+	
 	
 	
 	public List<Records> retrieveTconstantwithAverageRating(int avgRating)
@@ -424,7 +426,6 @@ public class test {
 	public static void main(String[] args) 
 	 {
 		test tree=new test();		
-
 			
 		System.out.println("--------------------Experiment 1 and 2----------------------");
 		List<blocks> blo = new ArrayList<blocks>();
@@ -467,10 +468,10 @@ public class test {
 	    {
 		    e.printStackTrace();
 		}
-	
+//	
 //		    one data block is equal to 100
-	    System.out.println("The number of blocks "+ blo.size());
-	    System.out.println("The size of database "+blo.size()*100);
+//	    System.out.println("The number of blocks "+ blo.size());
+//	    System.out.println("The size of database "+blo.size()*100);
 		    
 
 //			int No_of_nodes= tree.printTree();
@@ -481,52 +482,58 @@ public class test {
 			
 			
 //			Experiment 3
-		    System.out.println("------------------Experiment 3-----------------");
-			List<Records> tconstValue= tree.search(8);
-			for(int i= 0; i<tconstValue.size();i++)
-			{
-				//limit the max output to be 20 entries due to the huge amount of data
-				if(i<=20)
-				{
-					//printing of tconst value
-					System.out.println(" The t constant value is " + tconstValue.get(i).tconstant);
-				}
-				else 
-				{
-					break;
-				}
-			}
-//			Print out the number of blocks and the block data
-			int blockCounter=0;
-			for(int j=0; j<blo.size();j++)
-			{
-				//put the block into the dataBlo arraylist
-				List<Records> dataBlo =	blo.get(j).recordlist;
-				
-				for(int a=0;a<dataBlo.size();a++)
-				{
-					if(dataBlo.get(a).averagerating==8)
-					{
-						blockCounter++;
-						
-						for(int b=0; b<dataBlo.size();b++)
-						{
-									
-							Records r = dataBlo.get(b);
-							System.out.println("Tconst is "+ r.tconstant + " Average Rating is "+ r.averagerating + " Number of votes is "+ r.numofvote);
-							
-						}
-						break;
-
-					}
-				}
-			}
-			
-			System.out.print("Number of blocks: " + blockCounter);
+//		    System.out.println("------------------Experiment 3-----------------");
+//			List<Records> tconstValue= tree.search(8);
+//			for(int i= 0; i<tconstValue.size();i++)
+//			{
+//				//limit the max output to be 20 entries due to the huge amount of data
+//				if(i < 20)
+//				{
+//					//printing of tconst value
+//					System.out.println(" The t constant value is " + tconstValue.get(i).tconstant);
+//				}
+//				else 
+//				{
+//					break;
+//				}
+//			}
+////			Print out the number of blocks and the block data
+//			int blockCounter=0;
+//			for(int j=0; j<blo.size();j++)
+//			{
+//				//put the block into the dataBlo arraylist
+//				List<Records> dataBlo =	blo.get(j).recordlist;
+//				
+//				for(int a=0;a<dataBlo.size();a++)
+//				{
+//					if(dataBlo.get(a).averagerating==8)
+//					{
+//						blockCounter++;
+//						
+//						for(int b=0; b<dataBlo.size();b++)
+//						{
+//									
+//							Records r = dataBlo.get(b);
+//							System.out.println("Tconst is "+ r.tconstant + " Average Rating is "+ r.averagerating + " Number of votes is "+ r.numofvote);
+//							
+//						}
+//						break;
+//
+//					}
+//				}
+//			}
+//			
+//			System.out.print("Number of blocks: " + blockCounter);
 			
 			System.out.println("------Experiement 4--------------");
+			List<Keys> test= tree.search(7,9); 
+			List<String> testing= new ArrayList<String>();
 			
-			List <Records> rangeList= tree.search(7,9);
+			for(int d=0; d<test.size(); d++)
+			{
+//				Print out 20 records of the tconstant
+				System.out.println(test.get(d));
+			}
 	  }
 
 }

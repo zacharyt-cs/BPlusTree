@@ -5,11 +5,10 @@ import java.util.List;
 public class Main {
 	public static void main(String[] args){
 		BPlusTree tree=new BPlusTree();		
-
-		System.out.println("--------------------Experiment 1 and 2----------------------");
 		List<Blocks> blo = new ArrayList<Blocks>();
-
-		FileIO.readTSV("data.tsv", tree, blo);
+        FileIO.readTSV("data.tsv", tree, blo);
+        
+		// System.out.println("--------------------Experiment 1 and 2----------------------");
 		//	
 		// // one data block is equal to 100
 		// System.out.println("The number of blocks "+ blo.size());
@@ -61,9 +60,7 @@ public class Main {
 
 		System.out.println("------Experiment 4--------------");
 		List<Keys> test= tree.search(7,9); 
-
 		for(int d=0; d<test.size(); d++){
-			// Print out 20 records of the tconstant
 			Keys keys = test.get(d);
 			float key = keys.key;
 			List<Records> records = keys.values;

@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,38 +11,7 @@ public class Main {
 		System.out.println("--------------------Experiment 1 and 2----------------------");
 		List<Blocks> blo = new ArrayList<Blocks>();
 
-		ArrayList<String> Data = new ArrayList<>(); //initializing a new ArrayList out of String[]'s
-		try (BufferedReader TSVReader = new BufferedReader(new FileReader("data.tsv"))){
-			String line = null;
-			Blocks rblock= new Blocks();
-			blo.add(rblock);
-			int i=0;
-			while ((line = TSVReader.readLine()) != null){
-				if(i!=0){
-					String[] lineItems = line.split("\t"); //splitting the line and adding its items in String[]
-					Records rdata=new Records(lineItems[0],Double.parseDouble(lineItems[1]), Integer.parseInt(lineItems[2]));
-					tree.insert(Double.parseDouble(lineItems[1]), rdata);
-						
-					if(rblock.recordlist.size()==4)
-					{
-						rblock=new Blocks();
-					
-						blo.add(rblock);
-							rblock.recordlist.add(rdata);
-					}
-					else
-					{
-						rblock.recordlist.add(rdata);
-					}
-							
-				}
-				i++;
-				// Data.add(lineItems); //adding the splitted line array to the ArrayList
-			}
-			// BPlusTree.printTree();
-		}catch (Exception e){
-			e.printStackTrace();
-		}
+		FileIO.readTSV("data.tsv", tree, blo);
 		//	
 		// // one data block is equal to 100
 		// System.out.println("The number of blocks "+ blo.size());
@@ -91,13 +61,30 @@ public class Main {
 		// }
 		// System.out.print("Number of blocks: " + blockCounter);
 
-		System.out.println("------Experiement 4--------------");
+		System.out.println("------Experiment 4--------------");
 		List<Keys> test= tree.search(7,9); 
-		List<String> testing= new ArrayList<String>();
 
 		for(int d=0; d<test.size(); d++){
 			// Print out 20 records of the tconstant
-			System.out.println(test.get(d));
+			Keys keys = test.get(d);
+			double key = keys.key;
+			List<Records> records = keys.values;
+			System.out.println("key,");
+			for (Records record : records){
+				System.out.println(key+", "+record.tconstant+", "+record.numofvote);
+			}
 		}
+
+		// ByteArray to String, String to ByteArray
+        String example = "This is raw text!";
+        // string to byte[]
+        byte[] bytes = example.getBytes();
+
+        System.out.println("Text : " + example);
+        System.out.println("Text [Byte Format] : " + bytes);
+
+        // convert byte[] to string
+        String s = new String(bytes, StandardCharsets.UTF_8);
+        System.out.println("Output : " + s);
 	}
 }

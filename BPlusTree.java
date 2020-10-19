@@ -4,69 +4,79 @@ import java.util.List;
 import java.util.Queue;
 
 public class BPlusTree {
-	private int n=4;// degree of the tree
+	private int m=3;// degree of the tree
 	public Node root;// root of BplusTree
 	public static int counter=0;
-	
 	//constuctor for b plus tree
-	// public test() {
+	// public BPlusTree() {
 	// }
 	
 	/**
-	 *  Insert (key, value) pair into tree 
-	 * */ 
+	 * Insert key pair into tree
+	 * @param key
+	 * @param values
+	 */
 	public void insert(double key, Records values){
-		// If new tree, create root
-		if(this.root == null){
+		/**
+		 * If empty tree, create root node
+		 */
+		if(null== this.root){
 			Node newNode = new Node();
 			newNode.getKeys().add(new Keys(key, values));
 			this.root = newNode;
 			this.root.setParent(null);
 		}
-		// If node has no children && has space, insert here
-		else if((this.root.getChildren().isEmpty()) && 		// Root without children
-				this.root.getKeys().size() < (this.n-1)){	// Num of keys < n-1
+		/**
+		 * If leaf node, insert
+		 */
+		else if(this.root.getChildren().isEmpty() && 
+				this.root.getKeys().size() < (this.m -1)){
 			insertWithinExternalNode(key, values, this.root);
 		}
-		
+		/**
+		 * Else, traverse to leaf node and insert
+		 * If node is full, split node
+		 */
 		else{
 			Node current = this.root;
-			// If got children, search for children
 			while (!current.getChildren().isEmpty()) {
 				current = current.getChildren().get(binarySearchWithinInternalNode(key, current.getKeys()));
 			}
-			// 
 			insertWithinExternalNode(key, values, current);
-			if (current.getKeys().size() == this.n) {
-				// If the external node becomes full, we split it
-				splitExternalNode(current, this.n);
+			if (current.getKeys().size() == this.m) {
+				splitExternalNode(current, this.m);
 			}
 		}
+		
 	}
 
 	/**
-	 *  Insert (key, value) pair into external node
-	 * */ 
+	 * Insert key pair into specific node
+	 * @param key
+	 * @param value
+	 * @param node
+	 */
 	private void insertWithinExternalNode(double key, Records value, Node node) {
-		
-		//
 		int indexOfKey = binarySearchWithinInternalNode(key, node.getKeys());
-
-		// Key already exists. Add the new value to the list
+		/**
+		 * Handle duplicate keys
+		 */
 		if (indexOfKey != 0 && node.getKeys().get(indexOfKey - 1).getKey() == key) {
 			node.getKeys().get(indexOfKey - 1).getValues().add(value);
-		} else {
-			// Key doesn't exist. Add key and value
+		} 
+		else {
 			Keys newKey = new Keys(key, value);
 			node.getKeys().add(indexOfKey, newKey);
 		}
 	}
 	
+	/**
+	 * Split node when adding key into full node
+	 * @param curr
+	 * @param m
+	 */
 	private void splitExternalNode(Node curr, int m) {
-
-		// Find the middle index
 		int midIndex = m / 2;
-
 		Node middle = new Node();
 		Node rightPart = new Node();
 
@@ -91,6 +101,14 @@ public class BPlusTree {
 
 	}
 	
+	/**
+	 * 
+	 * @param curr
+	 * @param prev
+	 * @param m
+	 * @param toBeInserted
+	 * @param firstSplit
+	 */
 	private void splitInternalNode(Node curr, Node prev, int m, Node toBeInserted, boolean firstSplit) {
 		if (null == curr) {
 			// if we split the root before, then a new root has to be created
@@ -162,13 +180,9 @@ public class BPlusTree {
 	}
 	
 	/**
-	 * Merge internal nodes.
-	 *
+	 * Merge 2 nodes
 	 * @param mergeFrom
-	 *            to part from which we have to merge (middle of the previous
-	 *            split node)
 	 * @param mergeInto
-	 *            the internal node to be merged to
 	 */
 	private void mergeInternalNodes(Node mergeFrom, Node mergeInto) {
 		Keys keyToBeInserted = mergeFrom.getKeys().get(0);
@@ -273,63 +287,19 @@ public class BPlusTree {
 		
 //		System.out.println("The number of nodes is "+counter);
 	}
-	public void deleteKey(Node node,double key)
-	{
-//		case 1:there is more than minimum number of keys in the node. simpply delete the keys
-		
-		
-		int indexOfKey = binarySearchWithinInternalNode(key, node.getKeys());
-		System.out.println(indexOfKey);
-		
-	}
+//	public void deleteKey(double key)
+//	{
+////		case 1:there is more than minimum number of keys in the node. simpply delete the keys
+//		List<Records> deleteList = 
+//		Node curr = this.root;
+//		// Traverse to the corresponding external node that would 'should'
+//		// contain this key
+//		while (curr.getChildren().size() != 0) {
+//			curr = curr.getChildren().get(binarySearchWithinInternalNode(key, curr.getKeys()));
+//		}
+//		
+//	}
 
-	// public void delete(K key) {
-	// 	if(key == null || root == null) {
-	// 		return;
-	// 	}
-
-	// 	// Check if entry key exist in the leaf node
-	// 	LeafNode<K,T> leaf = (LeafNode<K,T>)treeSearch(root, key);
-	// 	if(leaf == null) {
-	// 		return;
-	// 	}
-		
-	// 	// Delete entry from subtree with root node pointer
-	// 	Entry<K, Node<K,T>> entry = new AbstractMap.SimpleEntry<K, Node<K,T>>(key, leaf);
-		
-	// 	// oldChildEntry null initially, and null upon return unless child deleted
-	// 	Entry<K, Node<K,T>> oldChildEntry = deleteChildEntry(root, root, entry, null);
-		
-	// 	// Readjust the root, no child is deleted
-	// 	if(oldChildEntry == null) {
-	// 		if(root.keys.size() == 0) {
-	// 			if(!root.isLeafNode) {
-	// 				root = ((IndexNode<K,T>) root).children.get(0);
-	// 			}
-	// 		}
-	// 		return;
-	// 	}
-	// 	// Child is deleted
-	// 	else {
-	// 		// Find empty node
-	// 		int i = 0;
-	// 		K oldKey = oldChildEntry.getKey();
-	// 		while(i < root.keys.size()) {
-	// 			if(oldKey.compareTo(root.keys.get(i)) == 0) {
-	// 				break;
-	// 			}
-	// 			i++;
-	// 		}
-	// 		// Return if empty node already discarded
-	// 		if(i == root.keys.size()) {
-	// 			return;
-	// 		}
-	// 		// Discard empty node
-	// 		root.keys.remove(i);
-	// 		((IndexNode<K,T>)root).children.remove(i+1);
-	// 		return;
-	// 	}
-	// }
 
 	/**
 	 * Modified Binary search within internal node.
@@ -405,6 +375,7 @@ public class BPlusTree {
 				break;
 			}
 		}
+
 		return searchValues;
 	}
 	
@@ -418,7 +389,6 @@ public class BPlusTree {
 	 *            the ending key
 	 * @return the list of key value pairs between the two keys
 	 */
-	
 	public List<Keys> search(double key1, double key2) {
 		//System.out.println("Searching between keys " + key1 + ", " + key2);
 		List<Keys> searchKeys = new ArrayList<>();
@@ -431,24 +401,30 @@ public class BPlusTree {
 		
 		// Start from current node and add keys whose value lies between key1 and key2 with their corresponding pairs
 		// Stop if end of list is encountered or if value encountered in list is greater than key2
+		
 		boolean endSearch = false;
 		while (null != currNode && !endSearch) {
 			for (int i = 0; i < currNode.getKeys().size(); i++) {
 				if (currNode.getKeys().get(i).getKey() >= key1 && currNode.getKeys().get(i).getKey() <= key2)
-					searchKeys.add(currNode.getKeys().get(i));
+					
+					searchKeys.add((currNode.getKeys().get(i)));
+				
 				if (currNode.getKeys().get(i).getKey() > key2) {
 					endSearch = true;
 				}
 			}
 			currNode = currNode.getNext();
 		}
+
 		return searchKeys;
 	}
-	
-	public List<Records> retrieveTconstantwithAverageRating(int avgRating){
+
+	public List<Records> retrieveTconstantwithAverageRating(int avgRating)
+	{
 		List<Records> searchValues = null;
 		return searchValues;
 	}
+
 }
 
 

@@ -1,599 +1,449 @@
-// Searching on a B+ tree in Java
-
-import java.util.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.StringTokenizer;
+import java.util.Queue;
 
 public class BPlusTree {
-  int m;
-  InternalNode root;
-  LeafNode firstLeaf;
-
-  // Binary search program
-  private int binarySearch(DictionaryPair[] dps, int numPairs, int t) {
-    Comparator<DictionaryPair> c = new Comparator<DictionaryPair>() {
-      @Override
-      public int compare(DictionaryPair o1, DictionaryPair o2) {
-        Integer a = Integer.valueOf(o1.key);
-        Integer b = Integer.valueOf(o2.key);
-        return a.compareTo(b);
-      }
-    };
-    return Arrays.binarySearch(dps, 0, numPairs, new DictionaryPair(t, 0), c);
-  }
-
-  // Find the leaf node
-  private LeafNode findLeafNode(int key) {
-
-    Integer[] keys = this.root.keys;
-    int i;
-
-    for (i = 0; i < this.root.degree - 1; i++) {
-      if (key < keys[i]) {
-        break;
-      }
-    }
-
-    Node child = this.root.childPointers[i];
-    if (child instanceof LeafNode) {
-      return (LeafNode) child;
-    } else {
-      return findLeafNode((InternalNode) child, key);
-    }
-  }
-
-  // Find the leaf node
-  private LeafNode findLeafNode(InternalNode node, int key) {
-
-    Integer[] keys = node.keys;
-    int i;
-
-    for (i = 0; i < node.degree - 1; i++) {
-      if (key < keys[i]) {
-        break;
-      }
-    }
-    Node childNode = node.childPointers[i];
-    if (childNode instanceof LeafNode) {
-      return (LeafNode) childNode;
-    } else {
-      return findLeafNode((InternalNode) node.childPointers[i], key);
-    }
-  }
-
-  // Finding the index of the pointer
-  private int findIndexOfPointer(Node[] pointers, LeafNode node) {
-    int i;
-    for (i = 0; i < pointers.length; i++) {
-      if (pointers[i] == node) {
-        break;
-      }
-    }
-    return i;
-  }
-
-  // Get the mid point
-  private int getMidpoint() {
-    return (int) Math.ceil((this.m + 1) / 2.0) - 1;
-  }
-
-  // Balance the tree
-  private void handleDeficiency(InternalNode in) {
-
-    InternalNode sibling;
-    InternalNode parent = in.parent;
-
-    if (this.root == in) {
-      for (int i = 0; i < in.childPointers.length; i++) {
-        if (in.childPointers[i] != null) {
-          if (in.childPointers[i] instanceof InternalNode) {
-            this.root = (InternalNode) in.childPointers[i];
-            this.root.parent = null;
-          } else if (in.childPointers[i] instanceof LeafNode) {
-            this.root = null;
-          }
-        }
-      }
-    }
-
-    else if (in.leftSibling != null && in.leftSibling.isLendable()) {
-      sibling = in.leftSibling;
-    } else if (in.rightSibling != null && in.rightSibling.isLendable()) {
-      sibling = in.rightSibling;
-
-      int borrowedKey = sibling.keys[0];
-      Node pointer = sibling.childPointers[0];
-
-      in.keys[in.degree - 1] = parent.keys[0];
-      in.childPointers[in.degree] = pointer;
-
-      parent.keys[0] = borrowedKey;
-
-      sibling.removePointer(0);
-      Arrays.sort(sibling.keys);
-      sibling.removePointer(0);
-      shiftDown(in.childPointers, 1);
-    } else if (in.leftSibling != null && in.leftSibling.isMergeable()) {
-
-    } else if (in.rightSibling != null && in.rightSibling.isMergeable()) {
-      sibling = in.rightSibling;
-      sibling.keys[sibling.degree - 1] = parent.keys[parent.degree - 2];
-      Arrays.sort(sibling.keys, 0, sibling.degree);
-      parent.keys[parent.degree - 2] = null;
-
-      for (int i = 0; i < in.childPointers.length; i++) {
-        if (in.childPointers[i] != null) {
-          sibling.prependChildPointer(in.childPointers[i]);
-          in.childPointers[i].parent = sibling;
-          in.removePointer(i);
-        }
-      }
-
-      parent.removePointer(in);
-
-      sibling.leftSibling = in.leftSibling;
-    }
-
-    if (parent != null && parent.isDeficient()) {
-      handleDeficiency(parent);
-    }
-  }
-
-  private boolean isEmpty() {
-    return firstLeaf == null;
-  }
-
-  private int linearNullSearch(DictionaryPair[] dps) {
-    for (int i = 0; i < dps.length; i++) {
-      if (dps[i] == null) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
-  private int linearNullSearch(Node[] pointers) {
-    for (int i = 0; i < pointers.length; i++) {
-      if (pointers[i] == null) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
-  private void shiftDown(Node[] pointers, int amount) {
-    Node[] newPointers = new Node[this.m + 1];
-    for (int i = amount; i < pointers.length; i++) {
-      newPointers[i - amount] = pointers[i];
-    }
-    pointers = newPointers;
-  }
-
-  private void sortDictionary(DictionaryPair[] dictionary) {
-    Arrays.sort(dictionary, new Comparator<DictionaryPair>() {
-      @Override
-      public int compare(DictionaryPair o1, DictionaryPair o2) {
-        if (o1 == null && o2 == null) {
-          return 0;
-        }
-        if (o1 == null) {
-          return 1;
-        }
-        if (o2 == null) {
-          return -1;
-        }
-        return o1.compareTo(o2);
-      }
-    });
-  }
-
-  private Node[] splitChildPointers(InternalNode in, int split) {
-
-    Node[] pointers = in.childPointers;
-    Node[] halfPointers = new Node[this.m + 1];
-
-    for (int i = split + 1; i < pointers.length; i++) {
-      halfPointers[i - split - 1] = pointers[i];
-      in.removePointer(i);
-    }
-
-    return halfPointers;
-  }
-
-  private DictionaryPair[] splitDictionary(LeafNode ln, int split) {
-
-    DictionaryPair[] dictionary = ln.dictionary;
-
-    DictionaryPair[] halfDict = new DictionaryPair[this.m];
-
-    for (int i = split; i < dictionary.length; i++) {
-      halfDict[i - split] = dictionary[i];
-      ln.delete(i);
-    }
-
-    return halfDict;
-  }
-
-  private void splitInternalNode(InternalNode in) {
-
-    InternalNode parent = in.parent;
-
-    int midpoint = getMidpoint();
-    int newParentKey = in.keys[midpoint];
-    Integer[] halfKeys = splitKeys(in.keys, midpoint);
-    Node[] halfPointers = splitChildPointers(in, midpoint);
-
-    in.degree = linearNullSearch(in.childPointers);
-
-    InternalNode sibling = new InternalNode(this.m, halfKeys, halfPointers);
-    for (Node pointer : halfPointers) {
-      if (pointer != null) {
-        pointer.parent = sibling;
-      }
-    }
-
-    sibling.rightSibling = in.rightSibling;
-    if (sibling.rightSibling != null) {
-      sibling.rightSibling.leftSibling = sibling;
-    }
-    in.rightSibling = sibling;
-    sibling.leftSibling = in;
-
-    if (parent == null) {
-
-      Integer[] keys = new Integer[this.m];
-      keys[0] = newParentKey;
-      InternalNode newRoot = new InternalNode(this.m, keys);
-      newRoot.appendChildPointer(in);
-      newRoot.appendChildPointer(sibling);
-      this.root = newRoot;
-
-      in.parent = newRoot;
-      sibling.parent = newRoot;
-
-    } else {
-
-      parent.keys[parent.degree - 1] = newParentKey;
-      Arrays.sort(parent.keys, 0, parent.degree);
-
-      int pointerIndex = parent.findIndexOfPointer(in) + 1;
-      parent.insertChildPointer(sibling, pointerIndex);
-      sibling.parent = parent;
-    }
-  }
-
-  private Integer[] splitKeys(Integer[] keys, int split) {
-
-    Integer[] halfKeys = new Integer[this.m];
-
-    keys[split] = null;
-
-    for (int i = split + 1; i < keys.length; i++) {
-      halfKeys[i - split - 1] = keys[i];
-      keys[i] = null;
-    }
-
-    return halfKeys;
-  }
-
-  public void insert(int key, double value) {
-    if (isEmpty()) {
-
-      LeafNode ln = new LeafNode(this.m, new DictionaryPair(key, value));
-
-      this.firstLeaf = ln;
-
-    } else {
-      LeafNode ln = (this.root == null) ? this.firstLeaf : findLeafNode(key);
-
-      if (!ln.insert(new DictionaryPair(key, value))) {
-
-        ln.dictionary[ln.numPairs] = new DictionaryPair(key, value);
-        ln.numPairs++;
-        sortDictionary(ln.dictionary);
-
-        int midpoint = getMidpoint();
-        DictionaryPair[] halfDict = splitDictionary(ln, midpoint);
-
-        if (ln.parent == null) {
-
-          Integer[] parent_keys = new Integer[this.m];
-          parent_keys[0] = halfDict[0].key;
-          InternalNode parent = new InternalNode(this.m, parent_keys);
-          ln.parent = parent;
-          parent.appendChildPointer(ln);
-
-        } else {
-          int newParentKey = halfDict[0].key;
-          ln.parent.keys[ln.parent.degree - 1] = newParentKey;
-          Arrays.sort(ln.parent.keys, 0, ln.parent.degree);
-        }
-
-        LeafNode newLeafNode = new LeafNode(this.m, halfDict, ln.parent);
-
-        int pointerIndex = ln.parent.findIndexOfPointer(ln) + 1;
-        ln.parent.insertChildPointer(newLeafNode, pointerIndex);
-
-        newLeafNode.rightSibling = ln.rightSibling;
-        if (newLeafNode.rightSibling != null) {
-          newLeafNode.rightSibling.leftSibling = newLeafNode;
-        }
-        ln.rightSibling = newLeafNode;
-        newLeafNode.leftSibling = ln;
-
-        if (this.root == null) {
-
-          this.root = ln.parent;
-
-        } else {
-          InternalNode in = ln.parent;
-          while (in != null) {
-            if (in.isOverfull()) {
-              splitInternalNode(in);
-            } else {
-              break;
-            }
-            in = in.parent;
-          }
-        }
-      }
-    }
-  }
-
-  public Double search(int key) {
-
-    if (isEmpty()) {
-      return null;
-    }
-
-    LeafNode ln = (this.root == null) ? this.firstLeaf : findLeafNode(key);
-
-    DictionaryPair[] dps = ln.dictionary;
-    int index = binarySearch(dps, ln.numPairs, key);
-
-    if (index < 0) {
-      return null;
-    } else {
-      return dps[index].value;
-    }
-  }
-
-  public ArrayList<Double> search(int lowerBound, int upperBound) {
-
-    ArrayList<Double> values = new ArrayList<Double>();
-
-    LeafNode currNode = this.firstLeaf;
-    while (currNode != null) {
-
-      DictionaryPair dps[] = currNode.dictionary;
-      for (DictionaryPair dp : dps) {
-
-        if (dp == null) {
-          break;
-        }
-
-        if (lowerBound <= dp.key && dp.key <= upperBound) {
-          values.add(dp.value);
-        }
-      }
-      currNode = currNode.rightSibling;
-
-    }
-
-    return values;
-  }
-
-  public BPlusTree(int m) {
-    this.m = m;
-    this.root = null;
-  }
-
-  public class Node {
-    InternalNode parent;
-  }
-
-  private class InternalNode extends Node {
-    int maxDegree;
-    int minDegree;
-    int degree;
-    InternalNode leftSibling;
-    InternalNode rightSibling;
-    Integer[] keys;
-    Node[] childPointers;
-
-    private void appendChildPointer(Node pointer) {
-      this.childPointers[degree] = pointer;
-      this.degree++;
-    }
-
-    private int findIndexOfPointer(Node pointer) {
-      for (int i = 0; i < childPointers.length; i++) {
-        if (childPointers[i] == pointer) {
-          return i;
-        }
-      }
-      return -1;
-    }
-
-    private void insertChildPointer(Node pointer, int index) {
-      for (int i = degree - 1; i >= index; i--) {
-        childPointers[i + 1] = childPointers[i];
-      }
-      this.childPointers[index] = pointer;
-      this.degree++;
-    }
-
-    private boolean isDeficient() {
-      return this.degree < this.minDegree;
-    }
-
-    private boolean isLendable() {
-      return this.degree > this.minDegree;
-    }
-
-    private boolean isMergeable() {
-      return this.degree == this.minDegree;
-    }
-
-    private boolean isOverfull() {
-      return this.degree == maxDegree + 1;
-    }
-
-    private void prependChildPointer(Node pointer) {
-      for (int i = degree - 1; i >= 0; i--) {
-        childPointers[i + 1] = childPointers[i];
-      }
-      this.childPointers[0] = pointer;
-      this.degree++;
-    }
-
-    private void removeKey(int index) {
-      this.keys[index] = null;
-    }
-
-    private void removePointer(int index) {
-      this.childPointers[index] = null;
-      this.degree--;
-    }
-
-    private void removePointer(Node pointer) {
-      for (int i = 0; i < childPointers.length; i++) {
-        if (childPointers[i] == pointer) {
-          this.childPointers[i] = null;
-        }
-      }
-      this.degree--;
-    }
-
-    private InternalNode(int m, Integer[] keys) {
-      this.maxDegree = m;
-      this.minDegree = (int) Math.ceil(m / 2.0);
-      this.degree = 0;
-      this.keys = keys;
-      this.childPointers = new Node[this.maxDegree + 1];
-    }
-
-    private InternalNode(int m, Integer[] keys, Node[] pointers) {
-      this.maxDegree = m;
-      this.minDegree = (int) Math.ceil(m / 2.0);
-      this.degree = linearNullSearch(pointers);
-      this.keys = keys;
-      this.childPointers = pointers;
-    }
-  }
-
-  public class LeafNode extends Node {
-    int maxNumPairs;
-    int minNumPairs;
-    int numPairs;
-    LeafNode leftSibling;
-    LeafNode rightSibling;
-    DictionaryPair[] dictionary;
-
-    public void delete(int index) {
-      this.dictionary[index] = null;
-      numPairs--;
-    }
-
-    public boolean insert(DictionaryPair dp) {
-      if (this.isFull()) {
-        return false;
-      } else {
-        this.dictionary[numPairs] = dp;
-        numPairs++;
-        Arrays.sort(this.dictionary, 0, numPairs);
-
-        return true;
-      }
-    }
-
-    public boolean isDeficient() {
-      return numPairs < minNumPairs;
-    }
-
-    public boolean isFull() {
-      return numPairs == maxNumPairs;
-    }
-
-    public boolean isLendable() {
-      return numPairs > minNumPairs;
-    }
-
-    public boolean isMergeable() {
-      return numPairs == minNumPairs;
-    }
-
-    public LeafNode(int m, DictionaryPair dp) {
-      this.maxNumPairs = m - 1;
-      this.minNumPairs = (int) (Math.ceil(m / 2) - 1);
-      this.dictionary = new DictionaryPair[m];
-      this.numPairs = 0;
-      this.insert(dp);
-    }
-
-    public LeafNode(int m, DictionaryPair[] dps, InternalNode parent) {
-      this.maxNumPairs = m - 1;
-      this.minNumPairs = (int) (Math.ceil(m / 2) - 1);
-      this.dictionary = dps;
-      this.numPairs = linearNullSearch(dps);
-      this.parent = parent;
-    }
-  }
-
-  public class DictionaryPair implements Comparable<DictionaryPair> {
-    int key;
-    double value;
-
-    public DictionaryPair(int key, double value) {
-      this.key = key;
-      this.value = value;
-    }
-
-    public int compareTo(DictionaryPair o) {
-      if (key == o.key) {
-        return 0;
-      } else if (key > o.key) {
-        return 1;
-      } else {
-        return -1;
-      }
-    }
-  }
-
-  public static void main(String[] args) throws Exception {
-	StringTokenizer st;
-	BufferedReader TSVFile = new BufferedReader(new FileReader("C:\\Users\\byeby\\eclipse-workspace\\data.tsv"));
-	String dataRow = TSVFile.readLine();
-	dataRow = TSVFile.readLine();
-	BPlusTree bpt = null;
-	bpt = new BPlusTree(3);	
-	while (dataRow != null) {
-		st = new StringTokenizer(dataRow,"\t");
-		List<String>dataArray = new ArrayList<String>();
-		while (st.hasMoreElements()) {
-			dataArray.add(st.nextElement().toString());
+	private int m=4;// degree of the tree
+	
+	public Node root;// root of BplusTree
+	public static int counter=0;
+	
+	//constuctor for b plus tree
+	// public test() {
+	// }
+	
+	public void insert(double key, Records values){
+		if(null== this.root){
+			// For an empty B Tree, root is created and its key is set as the
+			// newly inserted key
+			Node newNode = new Node();
+			newNode.getKeys().add(new Keys(key, values));
+			this.root = newNode;
+			// Since the root has no parent, parent set to null
+			this.root.setParent(null);
 		}
-//		
-
-		int key = Integer.parseInt(dataArray.remove(2));
-		double dic = Double.parseDouble(dataArray.remove(1));
-		bpt.insert(key, dic);
-//		for (String item:dataArray) {
-//			System.out.print(item + " ");
-//		}
-
-//		System.out.println();
-		dataRow = TSVFile.readLine();
+		
+		else if(this.root.getChildren().isEmpty() && this.root.getKeys().size()< (this.m -1)){
+			insertWithinExternalNode(key, values, this.root);
+		}
+		
+		else{
+			Node current = this.root;
+			// tranverse to the last level since we are inserting at the external node
+			while (!current.getChildren().isEmpty()) {
+				current = current.getChildren().get(binarySearchWithinInternalNode(key, current.getKeys()));
+			}
+			insertWithinExternalNode(key, values, current);
+			if (current.getKeys().size() == this.m) {
+				// If the external node becomes full, we split it
+				splitExternalNode(current, this.m);
+			}
+		}
+		
 	}
-	TSVFile.close();
-    if (bpt.search(120) != null) {
-        System.out.println("Found");
-      } else {
-        System.out.println("Not Found");
-      }
-  }
-  ;
+	private void insertWithinExternalNode(double key, Records value, Node node) {
+		// A binary search is executed to find the correct place where the node
+		// is to be inserted
+		int indexOfKey = binarySearchWithinInternalNode(key, node.getKeys());
+		if (indexOfKey != 0 && node.getKeys().get(indexOfKey - 1).getKey() == key) {
+			// Key already exists. Add the new value to the list
+			node.getKeys().get(indexOfKey - 1).getValues().add(value);
+		} else {
+			// Key doesn't exist. Add key and value
+			Keys newKey = new Keys(key, value);
+			node.getKeys().add(indexOfKey, newKey);
+		}
+	}
+	
+	private void splitExternalNode(Node curr, int m) {
+
+		// Find the middle index
+		int midIndex = m / 2;
+
+		Node middle = new Node();
+		Node rightPart = new Node();
+
+		// Set the right part to have middle element and the elements right to
+		// the middle element
+		rightPart.setKeys(curr.getKeys().subList(midIndex, curr.getKeys().size()));
+		rightPart.setParent(middle);
+		
+		// While making middle as the internal node, we add only the key since
+		// internal nodes of bplus tree do not contain values
+		middle.getKeys().add(new Keys(curr.getKeys().get(midIndex).getKey()));
+		middle.getChildren().add(rightPart);
+		
+		// Curr holds the left part, so update the split node to contain just
+		// the left part
+		curr.getKeys().subList(midIndex, curr.getKeys().size()).clear();
+
+		boolean firstSplit = true;
+		// propogate the middle element up the tree and merge with parent of
+		// previously overfull node
+		splitInternalNode(curr.getParent(), curr, m, middle, firstSplit);
+
+	}
+	
+	private void splitInternalNode(Node curr, Node prev, int m, Node toBeInserted, boolean firstSplit) {
+		if (null == curr) {
+			// if we split the root before, then a new root has to be created
+			this.root = toBeInserted;
+			// we find where the child has to be inserted by doing a binary
+			// search on keys
+			int indexForPrev = binarySearchWithinInternalNode(prev.getKeys().get(0).getKey(), toBeInserted.getKeys());
+			prev.setParent(toBeInserted);
+			toBeInserted.getChildren().add(indexForPrev, prev);
+			if (firstSplit) {
+				// update the linked list only for first split (for external node)
+				if (indexForPrev == 0) {
+					toBeInserted.getChildren().get(0).setNext(toBeInserted.getChildren().get(1));
+					toBeInserted.getChildren().get(1).setPrev(toBeInserted.getChildren().get(0));
+				} else {
+					toBeInserted.getChildren().get(indexForPrev + 1)
+							.setPrev(toBeInserted.getChildren().get(indexForPrev));
+					toBeInserted.getChildren().get(indexForPrev - 1)
+							.setNext(toBeInserted.getChildren().get(indexForPrev));
+				}
+			}
+		} else {
+			// merge the internal node with the mid + right of previous split
+			mergeInternalNodes(toBeInserted, curr);
+			if (curr.getKeys().size() == m) {
+				// do a split again if the internal node becomes full
+				int midIndex = (int) Math.ceil(m / 2.0) - 1;
+				Node middle = new Node();
+				Node rightPart = new Node();
+
+				// since internal nodes follow a split like the b tree, right
+				// part contains elements right of the mid element, and the
+				// middle becomes parent of right part
+				rightPart.setKeys(curr.getKeys().subList(midIndex + 1, curr.getKeys().size()));
+				rightPart.setParent(middle);
+
+				middle.getKeys().add(curr.getKeys().get(midIndex));
+				middle.getChildren().add(rightPart);
+
+				List<Node> childrenOfCurr = curr.getChildren();
+				List<Node> childrenOfRight = new ArrayList<>();
+
+				int lastChildOfLeft = childrenOfCurr.size() - 1;
+
+				// update the children that have to be sent to the right part
+				// from the split node
+				for (int i = childrenOfCurr.size() - 1; i >= 0; i--) {
+					List<Keys> currKeysList = childrenOfCurr.get(i).getKeys();
+					if (middle.getKeys().get(0).getKey() <= currKeysList.get(0).getKey()) {
+						childrenOfCurr.get(i).setParent(rightPart);
+						childrenOfRight.add(0, childrenOfCurr.get(i));
+						lastChildOfLeft--;
+					} else {
+						break;
+					}
+				}
+
+				rightPart.setChildren(childrenOfRight);
+
+				// update the overfull node to contain just the left part and
+				// update its children
+				curr.getChildren().subList(lastChildOfLeft + 1, childrenOfCurr.size()).clear();
+				curr.getKeys().subList(midIndex, curr.getKeys().size()).clear();
+
+				// propogate split one level up
+				splitInternalNode(curr.getParent(), curr, m, middle, false);
+			}
+		}
+	}
+	
+	/**
+	 * Merge internal nodes.
+	 *
+	 * @param mergeFrom
+	 *            to part from which we have to merge (middle of the previous
+	 *            split node)
+	 * @param mergeInto
+	 *            the internal node to be merged to
+	 */
+	private void mergeInternalNodes(Node mergeFrom, Node mergeInto) {
+		Keys keyToBeInserted = mergeFrom.getKeys().get(0);
+		Node childToBeInserted = mergeFrom.getChildren().get(0);
+		// Find the index where the key has to be inserted to by doing a binary
+		// search
+		int indexToBeInsertedAt = binarySearchWithinInternalNode(keyToBeInserted.getKey(), mergeInto.getKeys());
+		int childInsertPos = indexToBeInsertedAt;
+		if (keyToBeInserted.getKey() <= childToBeInserted.getKeys().get(0).getKey()) {
+			childInsertPos = indexToBeInsertedAt + 1;
+		}
+		childToBeInserted.setParent(mergeInto);
+		mergeInto.getChildren().add(childInsertPos, childToBeInserted);
+		mergeInto.getKeys().add(indexToBeInsertedAt, keyToBeInserted);
+
+		// Update Linked List of external nodes
+		if (!mergeInto.getChildren().isEmpty() && mergeInto.getChildren().get(0).getChildren().isEmpty()) {
+
+			// If merge is happening at the last element, then only pointer
+			// between new node and previously last element
+			// needs to be updated
+			if (mergeInto.getChildren().size() - 1 != childInsertPos
+					&& mergeInto.getChildren().get(childInsertPos + 1).getPrev() == null) {
+				mergeInto.getChildren().get(childInsertPos + 1).setPrev(mergeInto.getChildren().get(childInsertPos));
+				mergeInto.getChildren().get(childInsertPos).setNext(mergeInto.getChildren().get(childInsertPos + 1));
+			}
+			// If merge is happening at the last element, then only pointer
+			// between new node and previously last element
+			// needs to be updated
+			else if (0 != childInsertPos && mergeInto.getChildren().get(childInsertPos - 1).getNext() == null) {
+				mergeInto.getChildren().get(childInsertPos).setPrev(mergeInto.getChildren().get(childInsertPos - 1));
+				mergeInto.getChildren().get(childInsertPos - 1).setNext(mergeInto.getChildren().get(childInsertPos));
+			}
+			// If merge is happening in between, then the next element and the
+			// previous element's prev and next pointers have to be updated
+			else {
+				mergeInto.getChildren().get(childInsertPos)
+						.setNext(mergeInto.getChildren().get(childInsertPos - 1).getNext());
+				mergeInto.getChildren().get(childInsertPos).getNext()
+						.setPrev(mergeInto.getChildren().get(childInsertPos));
+				mergeInto.getChildren().get(childInsertPos - 1).setNext(mergeInto.getChildren().get(childInsertPos));
+				mergeInto.getChildren().get(childInsertPos).setPrev(mergeInto.getChildren().get(childInsertPos - 1));
+			}
+		}
+
+	}
+	
+	public int printTree() {
+		int numofNodes=0;
+		Queue<Node> queue = new LinkedList<Node>();
+		queue.add(this.root);
+		queue.add(null);
+		Node curr = null;
+		int levelNumber=2;
+		System.out.println("Printing level 1");
+		while (!queue.isEmpty()) {
+			curr = queue.poll();
+			if (null == curr) {
+				queue.add(null);
+				if (queue.peek() == null) {
+					break;
+				}
+				System.out.println("\n" + "Printing level " + levelNumber++);
+				continue;
+			}
+
+			printNode(curr);
+			numofNodes++;
+
+			if (curr.getChildren().isEmpty()) {
+				break;
+			}
+			for (int i = 0; i < curr.getChildren().size(); i++) {
+				queue.add(curr.getChildren().get(i));
+			}
+		}
+		curr = curr.getNext();
+		while (null != curr) {
+		
+			printNode(curr);
+			curr = curr.getNext();
+		}
+		System.out.println();
+		System.out.println("The height of the tree is " +(levelNumber-1));
+		
+		return numofNodes;
+		
+	}
+//	print the nodes of the tree
+	private void printNode(Node curr) {
+	
+		for (int i = 0; i < curr.getKeys().size(); i++) {
+			System.out.print(curr.getKeys().get(i).getKey() + ":(");
+			String values = "";
+			for (int j = 0; j < curr.getKeys().get(i).getValues().size(); j++) {
+				values = values + curr.getKeys().get(i).getValues().get(j) + ",";
+				counter+=1;
+			}
+			//System.out.print(values.isEmpty() ? ");" : values.substring(0, values.length() - 1) + ");");
+		}
+		System.out.print("||");
+		
+//		System.out.println("The number of nodes is "+counter);
+	}
+	public void deleteKey(Node node,double key)
+	{
+//		case 1:there is more than minimum number of keys in the node. simpply delete the keys
+		
+		
+		int indexOfKey = binarySearchWithinInternalNode(key, node.getKeys());
+		System.out.println(indexOfKey);
+		
+	}
+
+	// public void delete(K key) {
+	// 	if(key == null || root == null) {
+	// 		return;
+	// 	}
+
+	// 	// Check if entry key exist in the leaf node
+	// 	LeafNode<K,T> leaf = (LeafNode<K,T>)treeSearch(root, key);
+	// 	if(leaf == null) {
+	// 		return;
+	// 	}
+		
+	// 	// Delete entry from subtree with root node pointer
+	// 	Entry<K, Node<K,T>> entry = new AbstractMap.SimpleEntry<K, Node<K,T>>(key, leaf);
+		
+	// 	// oldChildEntry null initially, and null upon return unless child deleted
+	// 	Entry<K, Node<K,T>> oldChildEntry = deleteChildEntry(root, root, entry, null);
+		
+	// 	// Readjust the root, no child is deleted
+	// 	if(oldChildEntry == null) {
+	// 		if(root.keys.size() == 0) {
+	// 			if(!root.isLeafNode) {
+	// 				root = ((IndexNode<K,T>) root).children.get(0);
+	// 			}
+	// 		}
+	// 		return;
+	// 	}
+	// 	// Child is deleted
+	// 	else {
+	// 		// Find empty node
+	// 		int i = 0;
+	// 		K oldKey = oldChildEntry.getKey();
+	// 		while(i < root.keys.size()) {
+	// 			if(oldKey.compareTo(root.keys.get(i)) == 0) {
+	// 				break;
+	// 			}
+	// 			i++;
+	// 		}
+	// 		// Return if empty node already discarded
+	// 		if(i == root.keys.size()) {
+	// 			return;
+	// 		}
+	// 		// Discard empty node
+	// 		root.keys.remove(i);
+	// 		((IndexNode<K,T>)root).children.remove(i+1);
+	// 		return;
+	// 	}
+	// }
+
+	/**
+	 * Modified Binary search within internal node.
+	 *
+	 * @param key
+	 *            the key to be searched
+	 * @param keyList
+	 *            the list of keys to be searched
+	 * @return the first index of the list at which the key which is greater
+	 *         than the input key
+	 */
+	public int binarySearchWithinInternalNode(double key, List<Keys> keyList) {
+		int st = 0;
+		int end = keyList.size() - 1;
+		int mid;
+		int index = -1;
+		// Return first index if key is less than the first element
+		if (key < keyList.get(st).getKey()) {
+			return 0;
+		}
+		// Return array size + 1 as the new positin of the key if greater than
+		// last element
+		if (key >= keyList.get(end).getKey()) {
+			return keyList.size();
+		}
+		while (st <= end) {
+			mid = (st + end) / 2;
+			// Following condition ensures that we find a location s.t. key is
+			// smaller than element at that index and is greater than or equal
+			// to the element at the previous index. This location is where the
+			// key would be inserted
+			if (key < keyList.get(mid).getKey() && key >= keyList.get(mid - 1).getKey()) {
+				index = mid;
+				break;
+			} // Following conditions follow normal Binary Search
+			else if (key >= keyList.get(mid).getKey()) {
+				st = mid + 1;
+			} else {
+				end = mid - 1;
+			}
+		}
+		return index;
+	}
+
+	/**
+	 * Search values for a key
+	 *
+	 * @param key
+	 *            the key to be searched
+	 * @return the list of values for the key
+	 */
+	public List<Records> search(double key) {
+		List<Records> searchValues = null;
+		int numNodes=0;
+		Node curr = this.root;
+		// Traverse to the corresponding external node that would 'should'
+		// contain this key
+		while (curr.getChildren().size() != 0) {
+			curr = curr.getChildren().get(binarySearchWithinInternalNode(key, curr.getKeys()));
+		}
+		
+		List<Keys> keyList = curr.getKeys();
+		// Do a linear search in this node for the key. Set the parameter
+		// 'searchValues' only if success
+		for (int i = 0; i < keyList.size(); i++) {
+			if (key == keyList.get(i).getKey()) {
+				searchValues = keyList.get(i).getValues();
+				numNodes++;
+				System.out.println("The node it is accessing is "+ searchValues);
+				System.out.println("The number of node it is accessing is "+ numNodes);
+			}
+			if (key < keyList.get(i).getKey()) {
+				break;
+			}
+		}
+		return searchValues;
+	}
+	
+
+	/**
+	 * Search for all key values pairs between key1 and key2.
+	 *
+	 * @param key1
+	 *            the starting key
+	 * @param key2
+	 *            the ending key
+	 * @return the list of key value pairs between the two keys
+	 */
+	
+	public List<Keys> search(double key1, double key2) {
+		//System.out.println("Searching between keys " + key1 + ", " + key2);
+		List<Keys> searchKeys = new ArrayList<>();
+		Node currNode = this.root;
+		// Traverse to the corresponding external node that would 'should'
+		// contain starting key (key1)
+		while (currNode.getChildren().size() != 0) {
+			currNode = currNode.getChildren().get(binarySearchWithinInternalNode(key1, currNode.getKeys()));
+		}
+		
+		// Start from current node and add keys whose value lies between key1 and key2 with their corresponding pairs
+		// Stop if end of list is encountered or if value encountered in list is greater than key2
+		boolean endSearch = false;
+		while (null != currNode && !endSearch) {
+			for (int i = 0; i < currNode.getKeys().size(); i++) {
+				if (currNode.getKeys().get(i).getKey() >= key1 && currNode.getKeys().get(i).getKey() <= key2)
+					searchKeys.add(currNode.getKeys().get(i));
+				if (currNode.getKeys().get(i).getKey() > key2) {
+					endSearch = true;
+				}
+			}
+			currNode = currNode.getNext();
+		}
+		return searchKeys;
+	}
+	
+	public List<Records> retrieveTconstantwithAverageRating(int avgRating){
+		List<Records> searchValues = null;
+		return searchValues;
+	}
 }
+
+
+

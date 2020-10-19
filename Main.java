@@ -1,5 +1,3 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,24 +65,12 @@ public class Main {
 		for(int d=0; d<test.size(); d++){
 			// Print out 20 records of the tconstant
 			Keys keys = test.get(d);
-			double key = keys.key;
+			float key = keys.key;
 			List<Records> records = keys.values;
 			System.out.println("key,");
 			for (Records record : records){
 				System.out.println(key+", "+record.tconstant+", "+record.numofvote);
 			}
 		}
-
-		// ByteArray to String, String to ByteArray
-        String example = "This is raw text!";
-        // string to byte[]
-        byte[] bytes = example.getBytes();
-
-        System.out.println("Text : " + example);
-        System.out.println("Text [Byte Format] : " + bytes);
-
-        // convert byte[] to string
-        String s = new String(bytes, StandardCharsets.UTF_8);
-        System.out.println("Output : " + s);
 	}
 }

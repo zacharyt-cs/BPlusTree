@@ -3,6 +3,8 @@ import java.io.FileReader;
 import java.util.List;
 
 public class FileIO {
+    private FileIO(){
+    }
     /**
      * Read tsv file into database
      * @param path - Location of TSV file in String
@@ -18,11 +20,10 @@ public class FileIO {
             while ((line = tsvReader.readLine()) != null){
                 if(i!=0){
                     String[] lineItems = line.split("\t"); //splitting the line and adding its items in String[]
-                    Records rdata=new Records(lineItems[0],Double.parseDouble(lineItems[1]), Integer.parseInt(lineItems[2]));
-                    tree.insert(Double.parseDouble(lineItems[1]), rdata);
+                    Records rdata=new Records(lineItems[0],Float.parseFloat(lineItems[1]), Integer.parseInt(lineItems[2]));
+                    tree.insert(Float.parseFloat(lineItems[1]), rdata);
                         
-                    if(blk.recordlist.size()==4)
-                    {
+                    if(blk.recordlist.size()==4){
                         blk=new Blocks();
                     
                         blocks.add(blk);

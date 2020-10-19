@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Keys {
-	double key;
+	float key;
 
 	/** The list of values for the key. Set only for external nodes*/
 	List<Records> values;
@@ -10,7 +10,7 @@ public class Keys {
 
 //	  Instantiates a new key and its value.
 	
-	public Keys(double key,  Records value) {
+	public Keys(float key,  Records value) {
 		this.key = key;
 		if (null == this.values) {
 			values = new ArrayList<>();
@@ -21,7 +21,7 @@ public class Keys {
 	
 //	  Instantiates a new key
 
-	public Keys(double key) {
+	public Keys(float key) {
 		this.key = key;
 		this.values = new ArrayList<>();
 	}
@@ -29,14 +29,14 @@ public class Keys {
 	
 //	  Gets the key.
 
-	public double getKey() {
+	public float getKey() {
 		return key;
 	}
 
 
 //	  Sets the key.
 	
-	public void setKey(double key) {
+	public void setKey(float key) {
 		this.key = key;
 	}
 

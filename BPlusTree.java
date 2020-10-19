@@ -16,7 +16,7 @@ public class BPlusTree {
 	 * @param key
 	 * @param values
 	 */
-	public void insert(double key, Records values){
+	public void insert(float key, Records values){
 		/**
 		 * If empty tree, create root node
 		 */
@@ -56,7 +56,7 @@ public class BPlusTree {
 	 * @param value
 	 * @param node
 	 */
-	private void insertWithinExternalNode(double key, Records value, Node node) {
+	private void insertWithinExternalNode(float key, Records value, Node node) {
 		int indexOfKey = binarySearchWithinInternalNode(key, node.getKeys());
 		/**
 		 * Handle duplicate keys
@@ -287,7 +287,7 @@ public class BPlusTree {
 		
 //		System.out.println("The number of nodes is "+counter);
 	}
-//	public void deleteKey(double key)
+//	public void deleteKey(float key)
 //	{
 ////		case 1:there is more than minimum number of keys in the node. simpply delete the keys
 //		List<Records> deleteList = 
@@ -311,7 +311,7 @@ public class BPlusTree {
 	 * @return the first index of the list at which the key which is greater
 	 *         than the input key
 	 */
-	public int binarySearchWithinInternalNode(double key, List<Keys> keyList) {
+	public int binarySearchWithinInternalNode(float key, List<Keys> keyList) {
 		int st = 0;
 		int end = keyList.size() - 1;
 		int mid;
@@ -351,7 +351,7 @@ public class BPlusTree {
 	 *            the key to be searched
 	 * @return the list of values for the key
 	 */
-	public List<Records> search(double key) {
+	public List<Records> search(float key) {
 		List<Records> searchValues = null;
 		int numNodes=0;
 		Node curr = this.root;
@@ -389,7 +389,7 @@ public class BPlusTree {
 	 *            the ending key
 	 * @return the list of key value pairs between the two keys
 	 */
-	public List<Keys> search(double key1, double key2) {
+	public List<Keys> search(float key1, float key2) {
 		//System.out.println("Searching between keys " + key1 + ", " + key2);
 		List<Keys> searchKeys = new ArrayList<>();
 		Node currNode = this.root;

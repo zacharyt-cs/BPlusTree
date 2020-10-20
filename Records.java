@@ -2,11 +2,15 @@ public class Records {
 	String tconstant;
 	float averagerating;
 	int numofvote;
+	DiskRecord diskRecord;
+	byte[] header = new byte[4];
     
     Records(String constant, float avg, int vote){
+		diskRecord = new DiskRecord();
 		this.tconstant=constant;
 		this.averagerating=avg;
 		this.numofvote=vote;
+		this.diskRecord.setStorage(this);
 	}
 
 	public double getAveragerating() {

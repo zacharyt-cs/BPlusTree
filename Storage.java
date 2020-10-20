@@ -8,39 +8,33 @@ import java.io.UnsupportedEncodingException;
  * a ByteArray of (aB, bB, cB) whereby a+b+c=25B
  * 
  * 1. Read data from tsv
- * 2. Create Disk Storage
- *    a. Line by line, add record to Disk
- *    b. 
+ * 2. Create Disk Storage using tsv data
+ * 3. Insert records from disk into Bplustree
  */
 public class Storage {
 
     public static void main(String[] args) throws UnsupportedEncodingException {
-        // Fixed Record length of 26B
-        ByteArray record = new ByteArray(26);   // Initialise a record as ByteArray of fixed size 26B
-        record.writeInt(2279223);               // write numVotes into record (fixed size 4B)
-        record.writeFloat((float)9.9);          // write averageRating into record (fixed size 4B)
-        record.writeString("tt0000731");        // write tconst into record (fixed size 18B)
-        record.setPos(0);
-        int _numVotes = record.readInt();
-        float _averageRating = record.readFloat();
-        String _tconst = record.readString();
-        System.out.println(_numVotes+", "+ _averageRating + ", " + _tconst);
-        System.out.println(record.getPos());    // returns 26
+        Records r = new Records("tt0000321", (float) 8.2, 1234);
+        // r.diskRecord.printRecord();
+        Records r2 = new Records("tt0000123", (float) 9.9, 4321);
+        Records r3 = new Records("tt0001111", (float) 2.9, 1111111);
+
+        int blockSize = 100;
+        Blocks b = new Blocks(blockSize);
+        b.addRecord(r);
+        b.addRecord(r2);
+        b.addRecord(r3);
+        for(Records records : b.recordlist){
+            records.diskRecord.printRecord();
+        }
+        System.out.println(b.blockSize);
+
+        Blocks b2 = new Blocks(blockSize);
+        b2.addRecord(r);
+        b2.addRecord(r2);
+        b2.addRecord(r3);
+        for(Records records : b2.recordlist){
+            records.diskRecord.printRecord();
+        }
     }
-
-    // public static ByteBuffer allocate(int capacity) {
-    //     byte[] byteArray = new byte[capacity];
-    //     ByteBuffer buf = ByteBuffer.wrap(byteArray);
-    //     System.out.println(buf);
-    //     return buf;
-    // }
 }
-
-/** Num Bytes:
- * short = 2
- * long = 8
- * char = 2
- * int = 4
- * float = 4
- * double
- */

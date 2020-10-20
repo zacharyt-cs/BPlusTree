@@ -6,13 +6,8 @@ public class Main {
 
     public static int counter=0;
     static Scanner input = new Scanner(System.in);
-    
-    static BPlusTree tree = new BPlusTree();
-    static List<Blocks> blo = new ArrayList<Blocks>();
 
     public static void main(String[] args) {
-        
-        FileIO.readTSV("data.tsv", tree, blo);
 
         // Main Menu
         int first_option;
@@ -45,43 +40,13 @@ public class Main {
             }
         }
         while(first_option != 0);        
-        
-    	// Experiment 3
-        System.out.println("------------------Experiment 3-----------------");
-        List<Records> tconstValue= tree.search(8);
-        for(int i= 0; i<tconstValue.size();i++)
-        {
-            //limit the max output to be 20 entries due to the huge amount of data
-            if(i<=20){
-                //printing of tconst value
-                System.out.println(" The t constant value is " + tconstValue.get(i).tconstant);
-            }
-            else{
-                break;
-            }
-        }
-        // Print out the number of blocks and the block data
-        int blockCounter=0;
-        for(int j=0; j<blo.size();j++){
-            List<Records> dataBlo =	blo.get(j).recordlist;
-        
-            for(int a=0;a<dataBlo.size();a++){
-                if(dataBlo.get(a).averagerating==8){
-                    blockCounter++;
-                    for(int b=0; b<dataBlo.size();b++){
-                        Records r = dataBlo.get(b);
-                        System.out.println("Tconst is "+ r.tconstant + " Average Rating is "+ r.averagerating + " Number of votes is "+ r.numofvote);
-                        
-                    }
-                    break;
-                }
-            }
-        }
-        System.out.print("Number of blocks: " + blockCounter);
     }
 
     private static void runExperiments(int blocksize) {
         int second_option;
+        int n = blocksize/4;
+        BPlusTree tree = new BPlusTree(n);
+        
         do {
             System.out.println(
                 "Enter one of the following numbers:\n" + 
@@ -97,6 +62,10 @@ public class Main {
                 // run Exp 1
                     System.out.println("--------------------Experiment 1 and 2----------------------");
                     List<Blocks> blo = new ArrayList<Blocks>();
+                        
+                    
+                    FileIO.readTSV("data.tsv", tree, blo);
+
 
                     // one data block is equal to 100
                     System.out.println("The number of blocks "+ blo.size());
@@ -116,9 +85,39 @@ public class Main {
                 break;
 
                 case 3:
-                // run Expr 3
-                System.out.println("run ex 3");
-                break;
+                // Experiment 3
+                System.out.println("------------------Experiment 3-----------------");
+                List<Records> tconstValue= tree.search(8);
+                for(int i= 0; i<tconstValue.size();i++)
+                {
+                    //limit the max output to be 20 entries due to the huge amount of data
+                    if(i<=20){
+                        //printing of tconst value
+                        System.out.println(" The t constant value is " + tconstValue.get(i).tconstant);
+                    }
+                    else{
+                        break;
+                    }
+                }
+                // Print out the number of blocks and the block data
+                int blockCounter=0;
+                for(int j=0; j<blo.size();j++){
+                    List<Records> dataBlo =	blo.get(j).recordlist;
+                
+                    for(int a=0;a<dataBlo.size();a++){
+                        if(dataBlo.get(a).averagerating==8){
+                            blockCounter++;
+                            for(int b=0; b<dataBlo.size();b++){
+                                Records r = dataBlo.get(b);
+                                System.out.println("Tconst is "+ r.tconstant + " Average Rating is "+ r.averagerating + " Number of votes is "+ r.numofvote);
+                                
+                            }
+                            break;
+                        }
+                    }
+                }
+                System.out.print("Number of blocks: " + blockCounter);
+                        break;
 
                 case 4:
                 // run Expr 4

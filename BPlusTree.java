@@ -5,12 +5,16 @@ import java.util.Queue;
 
 public class BPlusTree {
 
-	// branching factor/max number of pointers
-	private int m=3;
+	// Max number of keys = n
+	// Max number of pointers = n+1
+	private int n;
 	// root of BplusTree
 	public Node root;
 	public static int counter=0;
 	
+	public BPlusTree(int max_child) {
+		this.n = max_child;
+	}
 	/**
 	 * Insert key pair into tree
 	 * @param key
@@ -30,7 +34,7 @@ public class BPlusTree {
 		 * If leaf node, insert
 		 */
 		else if(this.root.getChildren().isEmpty() && 
-				this.root.getKeys().size() < (this.m -1)){
+				this.root.getKeys().size() < (this.n -1)){
 			insertWithinExternalNode(key, values, this.root);
 		}
 		/**
@@ -43,8 +47,8 @@ public class BPlusTree {
 				current = current.getChildren().get(binarySearchWithinInternalNode(key, current.getKeys()));
 			}
 			insertWithinExternalNode(key, values, current);
-			if (current.getKeys().size() == this.m) {
-				splitExternalNode(current, this.m);
+			if (current.getKeys().size() == this.n) {
+				splitExternalNode(current, this.n);
 			}
 		}
 	}
@@ -94,7 +98,7 @@ public class BPlusTree {
 		curr.getKeys().subList(midIndex, curr.getKeys().size()).clear();
 
 		boolean firstSplit = true;
-		// propogate the middle element up the tree and merge with parent of
+		// propagate the middle element up the tree and merge with parent of
 		// previously overfull node
 		splitInternalNode(curr.getParent(), curr, m, middle, firstSplit);
 

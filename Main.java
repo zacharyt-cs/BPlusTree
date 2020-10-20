@@ -1,9 +1,6 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.nio.charset.StandardCharsets;
 
 public class Main {
 
@@ -11,11 +8,11 @@ public class Main {
     static Scanner input = new Scanner(System.in);
     
     static BPlusTree tree = new BPlusTree();
-    List<Blocks> blo = new ArrayList<Blocks>();
-    // unsure what this line does
-    //FileIO.readTSV("data.tsv", tree, blo);	
+    static List<Blocks> blo = new ArrayList<Blocks>();
 
     public static void main(String[] args) {
+        
+        FileIO.readTSV("data.tsv", tree, blo);
 
         // Main Menu
         int first_option;
@@ -100,37 +97,6 @@ public class Main {
                 // run Exp 1
                     System.out.println("--------------------Experiment 1 and 2----------------------");
                     List<Blocks> blo = new ArrayList<Blocks>();
-                    
-                    ArrayList<String> Data = new ArrayList<>(); //initializing a new ArrayList out of String[]'s
-                    try (BufferedReader TSVReader = new BufferedReader(new FileReader("data.tsv"))) {
-                        String line = null;
-                        Blocks rblock= new Blocks();
-                        blo.add(rblock);
-                        int i=0;
-                        while ((line = TSVReader.readLine()) != null) {
-                            if(i!=0){
-                                String[] lineItems = line.split("\t"); //splitting the line and adding its items in String[]
-                                Records rdata=new Records(lineItems[0],Double.parseDouble(lineItems[1]), Integer.parseInt(lineItems[2]));
-                                tree.insert(Double.parseDouble(lineItems[1]), rdata);
-                                
-                                if(rblock.recordlist.size()==4){
-                                    rblock=new Blocks();
-                                    blo.add(rblock);
-                                    rblock.recordlist.add(rdata);
-                                }
-                                else{
-                                    rblock.recordlist.add(rdata);
-                                }
-                                    
-                            }
-                            i++;
-                            // Data.add(lineItems); //adding the splitted line array to the ArrayList
-                        }
-                        // tree.printTree();
-                        
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
 
                     // one data block is equal to 100
                     System.out.println("The number of blocks "+ blo.size());

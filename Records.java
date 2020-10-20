@@ -1,3 +1,5 @@
+import java.util.Comparator;
+
 public class Records {
 	String tconstant;
 	float averagerating;
@@ -24,5 +26,13 @@ public class Records {
 	public void setTconstant(String tconstant) {
 		this.tconstant = tconstant;
 	}
+	
+	public static Comparator<Records> AvgRatingCompare = new Comparator<Records>()
+	{
+		public int compare(Records s1, Records s2)
+		{
+			return Float.compare(s1.averagerating, s2.averagerating);
+		}
+	};
 }
 

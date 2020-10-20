@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Queue;
 
 public class BPlusTree {
-	private int m=3;// degree of the tree
-	public Node root;// root of BplusTree
+
+	// branching factor/max number of pointers
+	private int m=3;
+	// root of BplusTree
+	public Node root;
 	public static int counter=0;
-	//constuctor for b plus tree
-	// public BPlusTree() {
-	// }
 	
 	/**
 	 * Insert key pair into tree
@@ -47,7 +47,6 @@ public class BPlusTree {
 				splitExternalNode(current, this.m);
 			}
 		}
-		
 	}
 
 	/**

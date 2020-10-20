@@ -1,9 +1,9 @@
 public class Records {
 	String tconstant;
-	double averagerating;
+	float averagerating;
 	int numofvote;
     
-    Records(String constant, double avg, int vote){
+    Records(String constant, float avg, int vote){
 		this.tconstant=constant;
 		this.averagerating=avg;
 		this.numofvote=vote;
@@ -12,7 +12,7 @@ public class Records {
 	public double getAveragerating() {
 		return averagerating;
 	}
-	public void setAveragerating(double averagerating) {
+	public void setAveragerating(float averagerating) {
 		this.averagerating = averagerating;
 	}
 	public int getNumofvote() {
@@ -25,3 +25,4 @@ public class Records {
 		this.tconstant = tconstant;
 	}
 }
+

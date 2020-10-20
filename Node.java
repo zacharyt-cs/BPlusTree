@@ -19,8 +19,9 @@ public class Node {
 	private Node parent;
 
 	/**
-	 * Instantiates a new node.
+	 * Instantiates a new node. 
 	 */
+	
 	public Node() {
 		this.keys = new ArrayList<>();
 		this.children = new ArrayList<>();

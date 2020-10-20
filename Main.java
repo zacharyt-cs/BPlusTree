@@ -3,13 +3,17 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.nio.charset.StandardCharsets;
 
 public class Main {
 
     public static int counter=0;
     static Scanner input = new Scanner(System.in);
     
-    BPlusTree tree = new BPlusTree();	
+    static BPlusTree tree = new BPlusTree();
+    List<Blocks> blo = new ArrayList<Blocks>();
+    // unsure what this line does
+    //FileIO.readTSV("data.tsv", tree, blo);	
 
     public static void main(String[] args) {
 
@@ -152,7 +156,17 @@ public class Main {
 
                 case 4:
                 // run Expr 4
-                System.out.println("run ex 4");
+                    System.out.println("------Experiment 4--------------");
+                    List<Keys> test= tree.search(7,9); 
+                    for(int d=0; d<test.size(); d++){
+                        Keys keys = test.get(d);
+                        float key = keys.key;
+                        List<Records> records = keys.values;
+                        System.out.println("key,");
+                        for (Records record : records){
+                            System.out.println(key+", "+record.tconstant+", "+record.numofvote);
+                        }
+                    }
                 break;
 
                 case 5:

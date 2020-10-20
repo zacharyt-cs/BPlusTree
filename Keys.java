@@ -2,15 +2,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Keys {
-	double key;
+	float key;
 
 	/** The list of values for the key. Set only for external nodes*/
 	List<Records> values;
 
-
-//	  Instantiates a new key and its value.
-	
-	public Keys(double key,  Records value) {
+	// Instantiates a new key and its value.
+	public Keys(float key,  Records value) {
 		this.key = key;
 		if (null == this.values) {
 			values = new ArrayList<>();
@@ -18,31 +16,23 @@ public class Keys {
 		this.values.add(value);
 	}
 	
-	
-//	  Instantiates a new key
-
-	public Keys(double key) {
+	// Instantiates a new key
+	public Keys(float key) {
 		this.key = key;
 		this.values = new ArrayList<>();
 	}
 
-	
-//	  Gets the key.
-
-	public double getKey() {
+	// Gets the key.
+	public float getKey() {
 		return key;
 	}
 
-
-//	  Sets the key.
-	
-	public void setKey(double key) {
+	// Sets the key.
+	public void setKey(float key) {
 		this.key = key;
 	}
 
-
-//	  Gets the values.
-	
+	// Gets the values.
 	public List<Records> getValues() {
 		return values;
 	}
@@ -60,5 +50,4 @@ public class Keys {
 	public String toString() {
 		return "Key [key=" + key + ", values=" + values + "]";
 	}
-	
 }

@@ -2,59 +2,48 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Main {
 
     public static int counter=0;
+    static Scanner input = new Scanner(System.in);
     
+    BPlusTree tree = new BPlusTree();	
+
     public static void main(String[] args) {
-        BPlusTree tree=new BPlusTree();	
 
-        System.out.println("--------------------Experiment 1 and 2----------------------");
-        List<Blocks> blo = new ArrayList<Blocks>();
-        
-        ArrayList<String> Data = new ArrayList<>(); //initializing a new ArrayList out of String[]'s
-        try (BufferedReader TSVReader = new BufferedReader(new FileReader("data.tsv"))) {
-            String line = null;
-            Blocks rblock= new Blocks();
-            blo.add(rblock);
-            int i=0;
-            while ((line = TSVReader.readLine()) != null) {
-                if(i!=0){
-                    String[] lineItems = line.split("\t"); //splitting the line and adding its items in String[]
-                    Records rdata=new Records(lineItems[0],Double.parseDouble(lineItems[1]), Integer.parseInt(lineItems[2]));
-                    tree.insert(Double.parseDouble(lineItems[1]), rdata);
-                    
-                    if(rblock.recordlist.size()==4){
-                        rblock=new Blocks();
-                        blo.add(rblock);
-                        rblock.recordlist.add(rdata);
-                    }
-                    else{
-                        rblock.recordlist.add(rdata);
-                    }
-                        
-                }
-                i++;
-                // Data.add(lineItems); //adding the splitted line array to the ArrayList
+        // Main Menu
+        int first_option;
+        do {
+            System.out.println(
+                "Enter one of the following numbers\n" + 
+                "1. Set block size to 100 B\n" + 
+                "2. Set block size to 500 B\n" +
+                "0. Exit"
+                );
+            first_option = input.nextInt();
+            switch(first_option){
+                case 1:    
+                // initialize block size = 100 B
+                    runExperiments(100);
+                break;
+
+                case 2:
+                // initialize block size = 500 B
+                    runExperiments(500);
+                break;
+
+                case 0:
+                // terminate
+                break;
+
+                default:
+                System.out.println("Invalid option! Please try again.");
+                break;
             }
-            // tree.printTree();
-            
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-
-        // one data block is equal to 100
-        System.out.println("The number of blocks "+ blo.size());
-        System.out.println("The size of database "+blo.size()*100);
-        
-
-        // int No_of_nodes= tree.printTree();
-        // need multply by node size
-        // int calculateSize;
-        // my degree is 4 so 8 *4 bytes, Since is 8
-        // calculateSize= No_of_nodes* 96;
-        
+        while(first_option != 0);        
         
     	// Experiment 3
         System.out.println("------------------Experiment 3-----------------");
@@ -89,4 +78,91 @@ public class Main {
         }
         System.out.print("Number of blocks: " + blockCounter);
     }
+
+    private static void runExperiments(int blocksize) {
+        int second_option;
+        do {
+            System.out.println(
+                "Enter one of the following numbers:\n" + 
+                "1) Run Experiment 1\n" +
+                "2) Run Experiment 2\n" +
+                "3) Run Experiment 3\n" +
+                "4) Run Experiment 4\n" +
+                "5) Run Experiment 5\n" +
+                "0 to change block size");
+            second_option = input.nextInt();
+            switch(second_option){
+                case 1:
+                // run Exp 1
+                    System.out.println("--------------------Experiment 1 and 2----------------------");
+                    List<Blocks> blo = new ArrayList<Blocks>();
+                    
+                    ArrayList<String> Data = new ArrayList<>(); //initializing a new ArrayList out of String[]'s
+                    try (BufferedReader TSVReader = new BufferedReader(new FileReader("data.tsv"))) {
+                        String line = null;
+                        Blocks rblock= new Blocks();
+                        blo.add(rblock);
+                        int i=0;
+                        while ((line = TSVReader.readLine()) != null) {
+                            if(i!=0){
+                                String[] lineItems = line.split("\t"); //splitting the line and adding its items in String[]
+                                Records rdata=new Records(lineItems[0],Double.parseDouble(lineItems[1]), Integer.parseInt(lineItems[2]));
+                                tree.insert(Double.parseDouble(lineItems[1]), rdata);
+                                
+                                if(rblock.recordlist.size()==4){
+                                    rblock=new Blocks();
+                                    blo.add(rblock);
+                                    rblock.recordlist.add(rdata);
+                                }
+                                else{
+                                    rblock.recordlist.add(rdata);
+                                }
+                                    
+                            }
+                            i++;
+                            // Data.add(lineItems); //adding the splitted line array to the ArrayList
+                        }
+                        // tree.printTree();
+                        
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    // one data block is equal to 100
+                    System.out.println("The number of blocks "+ blo.size());
+                    System.out.println("The size of database "+blo.size()*100);
+                    
+
+                    // int No_of_nodes= tree.printTree();
+                    // need multply by node size
+                    // int calculateSize;
+                    // my degree is 4 so 8 *4 bytes, Since is 8
+                    // calculateSize= No_of_nodes* 96;
+                break;
+
+                case 2:
+                // run Exp 2
+                System.out.println("run ex 2");
+                break;
+
+                case 3:
+                // run Expr 3
+                System.out.println("run ex 3");
+                break;
+
+                case 4:
+                // run Expr 4
+                System.out.println("run ex 4");
+                break;
+
+                case 5:
+                // run Expr 5
+                System.out.println("run ex 5");
+                break;
+            }
+        } while (second_option != 0);
+    }
 }
+
+    
+

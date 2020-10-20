@@ -6,9 +6,11 @@ public class Main {
 
     public static int counter=0;
     static Scanner input = new Scanner(System.in);
+    
+    
 
     public static void main(String[] args) {
-
+    
         // Main Menu
         int first_option;
         do {
@@ -46,6 +48,8 @@ public class Main {
         int second_option;
         int n = blocksize/4;
         BPlusTree tree = new BPlusTree(n);
+        List<Blocks> blo = new ArrayList<Blocks>();
+        FileIO.readTSV("data.tsv", tree, blo);
         
         do {
             System.out.println(
@@ -61,87 +65,123 @@ public class Main {
                 case 1:
                 // run Exp 1
                     System.out.println("--------------------Experiment 1 and 2----------------------");
-                    List<Blocks> blo = new ArrayList<Blocks>();
-                        
-                    
-                    FileIO.readTSV("data.tsv", tree, blo);
-
+                   
 
                     // one data block is equal to 100
                     System.out.println("The number of blocks "+ blo.size());
                     System.out.println("The size of database "+blo.size()*100);
                     
 
-                    // int No_of_nodes= tree.printTree();
-                    // need multply by node size
-                    // int calculateSize;
-                    // my degree is 4 so 8 *4 bytes, Since is 8
-                    // calculateSize= No_of_nodes* 96;
+                   
                 break;
 
                 case 2:
                 // run Exp 2
                 System.out.println("run ex 2");
+                tree.printTree();
                 break;
 
                 case 3:
-                // Experiment 3
-                System.out.println("------------------Experiment 3-----------------");
-                List<Records> tconstValue= tree.search(8);
-                for(int i= 0; i<tconstValue.size();i++)
-                {
-                    //limit the max output to be 20 entries due to the huge amount of data
-                    if(i<=20){
-                        //printing of tconst value
-                        System.out.println(" The t constant value is " + tconstValue.get(i).tconstant);
-                    }
-                    else{
-                        break;
-                    }
-                }
-                // Print out the number of blocks and the block data
-                int blockCounter=0;
-                for(int j=0; j<blo.size();j++){
-                    List<Records> dataBlo =	blo.get(j).recordlist;
-                
-                    for(int a=0;a<dataBlo.size();a++){
-                        if(dataBlo.get(a).averagerating==8){
-                            blockCounter++;
-                            for(int b=0; b<dataBlo.size();b++){
-                                Records r = dataBlo.get(b);
-                                System.out.println("Tconst is "+ r.tconstant + " Average Rating is "+ r.averagerating + " Number of votes is "+ r.numofvote);
-                                
-                            }
-                            break;
-                        }
-                    }
-                }
-                System.out.print("Number of blocks: " + blockCounter);
-                        break;
+                // run Expr 3
+                System.out.println("run ex 3");
+               
+    		    
+    			List<Records> tconstValue= tree.search(8);
+    			for(int i= 0; i<tconstValue.size();i++)
+    			{
+    				//limit the max output to be 20 entries due to the huge amount of data
+    				
+    					//printing of tconst value
+    					System.out.println(" The t constant value is " + tconstValue.get(i).tconstant);
+    			
+    			}
+//    			Print out the number of blocks and the block data
+    			int blockCounter=0;
+    			for(int j=0; j<blo.size();j++)
+    			{
+    				//put the block into the dataBlo arraylist
+    				List<Records> dataBlo =	blo.get(j).recordlist;
+    				
+    				for(int a=0;a<dataBlo.size();a++)
+    				{
+    					if(dataBlo.get(a).averagerating==8)
+    					{
+    						blockCounter++;
+    						
+    						for(int b=0; b<dataBlo.size();b++)
+    						{
+    									
+    							Records r = dataBlo.get(b);
+    							System.out.println(" The block data it accessing is "+"Tconst : "+ r.tconstant + " Average Rating:  "+ r.averagerating + " Number of votes : "+ r.numofvote);
+    							
+    						}
+    						break;
+    
+    					}
+    				}
+    			}
+    			
+    			System.out.println("Number of blocks: " + blockCounter);
+                break;
 
                 case 4:
                 // run Expr 4
                     System.out.println("------Experiment 4--------------");
+                    int rangeCounter=0;
                     List<Keys> test= tree.search(7,9); 
                     for(int d=0; d<test.size(); d++){
-                        Keys keys = test.get(d);
-                        float key = keys.key;
-                        List<Records> records = keys.values;
-                        System.out.println("key,");
-                        for (Records record : records){
-                            System.out.println(key+", "+record.tconstant+", "+record.numofvote);
-                        }
-                    }
-                break;
+                    	  Keys keys = test.get(d);
+                              float key = keys.key;
+                              
+                              	 List<Records> records = keys.values;
+                                   
+                                       System.out.println("key,");
+                                       for (Records record : records)
+                                       {
+                                    	   
+                                    	   System.out.println("Tconst is "+record.tconstant);
+                                       
+                                    	   rangeCounter++;
+                                       }
 
+
+                    }
+                    int blockSize=0;
+                    int printNum=1;
+               
+                    for(int g=0; g< blo.size();g++)
+                    {
+                    	List<Records> rangeBlo =blo.get(g).recordlist;
+        				
+        				for(int a=0;a<rangeBlo.size();a++)
+        				{
+        				
+        					if(rangeBlo.get(a).averagerating >= 7.0f && rangeBlo.get(a).averagerating <=9.0f)
+        					{
+        						blockSize++;
+        						
+        							for(int b=0; b<rangeBlo.size();b++)
+            						{
+            						
+            								Records r = rangeBlo.get(b);
+                							System.out.println(" The block data it accessing is "+"Tconst : "+ r.tconstant + " Average Rating:  "+ r.averagerating + " Number of votes : "+ r.numofvote);
+                							printNum++;
+
+            						}
+
+        						break;
+        					}
+        				}
+        				
+                    }
+                    System.out.println("Number of blocks: "+ blockSize);
+                break;
                 case 5:
                 // run Expr 5
                 System.out.println("run ex 5");
+                
                 break;
             }
         } while (second_option != 0);
     }
 }
-
-    
-

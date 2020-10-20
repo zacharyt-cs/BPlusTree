@@ -4,13 +4,18 @@ import java.util.List;
 import java.util.Queue;
 
 public class BPlusTree {
-	private int m=3;// degree of the tree
+	// Max number of keys = n
+	// Max number of pointers = n+1
+	private int n;
 	public Node root;// root of BplusTree
 	public static int counter=0;
 	//constuctor for b plus tree
 	// public BPlusTree() {
 	// }
-	
+
+	public BPlusTree(int max_child) {
+		this.n = max_child;
+	}
 	/**
 	 * Insert key pair into tree
 	 * @param key
@@ -30,7 +35,7 @@ public class BPlusTree {
 		 * If leaf node, insert
 		 */
 		else if(this.root.getChildren().isEmpty() && 
-				this.root.getKeys().size() < (this.m -1)){
+				this.root.getKeys().size() < (this.n -1)){
 			insertWithinExternalNode(key, values, this.root);
 		}
 		/**
@@ -43,8 +48,8 @@ public class BPlusTree {
 				current = current.getChildren().get(binarySearchWithinInternalNode(key, current.getKeys()));
 			}
 			insertWithinExternalNode(key, values, current);
-			if (current.getKeys().size() == this.m) {
-				splitExternalNode(current, this.m);
+			if (current.getKeys().size() == this.n) {
+				splitExternalNode(current, this.n);
 			}
 		}
 		
@@ -287,18 +292,7 @@ public class BPlusTree {
 		
 //		System.out.println("The number of nodes is "+counter);
 	}
-//	public void deleteKey(float key)
-//	{
-////		case 1:there is more than minimum number of keys in the node. simpply delete the keys
-//		List<Records> deleteList = 
-//		Node curr = this.root;
-//		// Traverse to the corresponding external node that would 'should'
-//		// contain this key
-//		while (curr.getChildren().size() != 0) {
-//			curr = curr.getChildren().get(binarySearchWithinInternalNode(key, curr.getKeys()));
-//		}
-//		
-//	}
+
 
 
 	/**
@@ -358,6 +352,8 @@ public class BPlusTree {
 		// Traverse to the corresponding external node that would 'should'
 		// contain this key
 		while (curr.getChildren().size() != 0) {
+			System.out.println("Is accessing nodes: "+ curr.getKeys());
+			numNodes++;
 			curr = curr.getChildren().get(binarySearchWithinInternalNode(key, curr.getKeys()));
 		}
 		
@@ -365,10 +361,12 @@ public class BPlusTree {
 		// Do a linear search in this node for the key. Set the parameter
 		// 'searchValues' only if success
 		for (int i = 0; i < keyList.size(); i++) {
+//			print the nodes it is accessing
+			
 			if (key == keyList.get(i).getKey()) {
 				searchValues = keyList.get(i).getValues();
-				numNodes++;
-				System.out.println("The node it is accessing is "+ searchValues);
+				
+//				System.out.println("The node it is accessing is "+ searchValues);
 				System.out.println("The number of node it is accessing is "+ numNodes);
 			}
 			if (key < keyList.get(i).getKey()) {
@@ -393,9 +391,12 @@ public class BPlusTree {
 		//System.out.println("Searching between keys " + key1 + ", " + key2);
 		List<Keys> searchKeys = new ArrayList<>();
 		Node currNode = this.root;
+		int rangeNode=0;
 		// Traverse to the corresponding external node that would 'should'
 		// contain starting key (key1)
 		while (currNode.getChildren().size() != 0) {
+			System.out.println("Is accessing nodes: "+ currNode.getKeys());
+			rangeNode++;
 			currNode = currNode.getChildren().get(binarySearchWithinInternalNode(key1, currNode.getKeys()));
 		}
 		
@@ -426,6 +427,3 @@ public class BPlusTree {
 	// }
 
 }
-
-
-

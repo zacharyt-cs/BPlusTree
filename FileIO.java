@@ -1,5 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class FileIO {
@@ -11,35 +13,45 @@ public class FileIO {
      * @param tree - BPlusTree that data will be inserted into
      * @param blocks - Mimic blocks on a Main Memory
      */
+ 
     public static void readTSV(String path, BPlusTree tree, List<Blocks> blocks){
+    	Blocks blk= new Blocks();
+    	List<Records> testingRecord= new ArrayList<Records>();
         try (BufferedReader tsvReader = new BufferedReader(new FileReader(path))){
             String line = null;
-            Blocks blk= new Blocks();
-            blocks.add(blk);
+
             int i=0;
             while ((line = tsvReader.readLine()) != null){
                 if(i!=0){
                     String[] lineItems = line.split("\t"); //splitting the line and adding its items in String[]
                     Records rdata=new Records(lineItems[0],Float.parseFloat(lineItems[1]), Integer.parseInt(lineItems[2]));
-                    tree.insert(Float.parseFloat(lineItems[1]), rdata);
-                        
-                    if(blk.recordlist.size()==4){
-                        blk=new Blocks();
-                    
-                        blocks.add(blk);
-                        blk.recordlist.add(rdata);
-                    }
-                    else
-                    {
-                        blk.recordlist.add(rdata);
-                    }
+                    testingRecord.add(rdata);
                 }
                 i++;
-                // Data.add(lineItems); //adding the splitted line array to the ArrayList
             }
-            // BPlusTree.printTree();
-        }catch (Exception e){
+        } catch (Exception e){
             e.printStackTrace();
         }
+        // Sorting
+        System.out.println("Sorting");
+        Collections.sort(testingRecord,Records.AvgRatingCompare);
+
+        for(int i=0; i<testingRecord.size();i++)
+        {
+        	tree.insert(testingRecord.get(i).averagerating,(Records)testingRecord.get(i) );
+        	if(blk.recordlist.size()==4)
+        	{
+        		  blk=new Blocks();
+                  
+                  blocks.add(blk);
+        		blk.recordlist.add(testingRecord.get(i));
+        	
+        	}
+        	else
+        	{
+        		blk.recordlist.add(testingRecord.get(i));
+        	}
+        }
+        
     }
 }

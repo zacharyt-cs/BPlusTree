@@ -109,8 +109,8 @@ public class Main {
                     //     System.out.print(record.tconstant+",");
                     //     rangeCounter++;
                     // }
-                    System.out.println("Please refer to Experiment_4.txt for the tconst of the key "+records.get(0).averagerating);
-                    try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("Experiment_4"), "utf-8"))) {
+                    System.out.println("Please refer to Experiment_4_"+records.get(0).averagerating+".txt for the tconst of the key "+records.get(0).averagerating);
+                    try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("Experiment_4_"+records.get(0).averagerating), "utf-8"))) {
                         for (Records record : records){
                             writer.write(record.tconstant+",");
                             rangeCounter++;

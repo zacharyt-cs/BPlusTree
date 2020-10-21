@@ -9,39 +9,28 @@ public class BPlusTree {
 	private int n;
 	public Node root;// root of BplusTree
 	public static int counter=0;
-	//constuctor for b plus tree
-	// public BPlusTree() {
-	// }
+	int heightOfTree=0;
+	int numofNodes=0;
 
 	public BPlusTree(int max_child) {
 		this.n = max_child;
 	}
-	/**
-	 * Insert key pair into tree
-	 * @param key
-	 * @param values
-	 */
+
 	public void insert(float key, Records values){
-		/**
-		 * If empty tree, create root node
-		 */
+		// If empty tree, create root node
 		if(null== this.root){
 			Node newNode = new Node();
 			newNode.getKeys().add(new Keys(key, values));
 			this.root = newNode;
 			this.root.setParent(null);
 		}
-		/**
-		 * If leaf node, insert
-		 */
+		// If leaf node, insert
 		else if(this.root.getChildren().isEmpty() && 
 				this.root.getKeys().size() < (this.n -1)){
 			insertWithinExternalNode(key, values, this.root);
 		}
-		/**
-		 * Else, traverse to leaf node and insert
-		 * If node is full, split node
-		 */
+		//  Else, traverse to leaf node and insert
+		//  If node is full, split node
 		else{
 			Node current = this.root;
 			while (!current.getChildren().isEmpty()) {
@@ -55,17 +44,9 @@ public class BPlusTree {
 		
 	}
 
-	/**
-	 * Insert key pair into specific node
-	 * @param key
-	 * @param value
-	 * @param node
-	 */
 	private void insertWithinExternalNode(float key, Records value, Node node) {
 		int indexOfKey = binarySearchWithinInternalNode(key, node.getKeys());
-		/**
-		 * Handle duplicate keys
-		 */
+		// Handle duplicate keys
 		if (indexOfKey != 0 && node.getKeys().get(indexOfKey - 1).getKey() == key) {
 			node.getKeys().get(indexOfKey - 1).getValues().add(value);
 		} 
@@ -75,11 +56,6 @@ public class BPlusTree {
 		}
 	}
 	
-	/**
-	 * Split node when adding key into full node
-	 * @param curr
-	 * @param m
-	 */
 	private void splitExternalNode(Node curr, int m) {
 		int midIndex = m / 2;
 		Node middle = new Node();
@@ -106,14 +82,6 @@ public class BPlusTree {
 
 	}
 	
-	/**
-	 * 
-	 * @param curr
-	 * @param prev
-	 * @param m
-	 * @param toBeInserted
-	 * @param firstSplit
-	 */
 	private void splitInternalNode(Node curr, Node prev, int m, Node toBeInserted, boolean firstSplit) {
 		if (null == curr) {
 			// if we split the root before, then a new root has to be created
@@ -184,16 +152,10 @@ public class BPlusTree {
 		}
 	}
 	
-	/**
-	 * Merge 2 nodes
-	 * @param mergeFrom
-	 * @param mergeInto
-	 */
 	private void mergeInternalNodes(Node mergeFrom, Node mergeInto) {
 		Keys keyToBeInserted = mergeFrom.getKeys().get(0);
 		Node childToBeInserted = mergeFrom.getChildren().get(0);
-		// Find the index where the key has to be inserted to by doing a binary
-		// search
+		// Find the index where the key has to be inserted to by doing a binary search
 		int indexToBeInsertedAt = binarySearchWithinInternalNode(keyToBeInserted.getKey(), mergeInto.getKeys());
 		int childInsertPos = indexToBeInsertedAt;
 		if (keyToBeInserted.getKey() <= childToBeInserted.getKeys().get(0).getKey()) {
@@ -206,23 +168,18 @@ public class BPlusTree {
 		// Update Linked List of external nodes
 		if (!mergeInto.getChildren().isEmpty() && mergeInto.getChildren().get(0).getChildren().isEmpty()) {
 
-			// If merge is happening at the last element, then only pointer
-			// between new node and previously last element
-			// needs to be updated
+			// If merge is happening at the last element, then only pointer between new node and previously last element needs to be updated
 			if (mergeInto.getChildren().size() - 1 != childInsertPos
 					&& mergeInto.getChildren().get(childInsertPos + 1).getPrev() == null) {
 				mergeInto.getChildren().get(childInsertPos + 1).setPrev(mergeInto.getChildren().get(childInsertPos));
 				mergeInto.getChildren().get(childInsertPos).setNext(mergeInto.getChildren().get(childInsertPos + 1));
 			}
-			// If merge is happening at the last element, then only pointer
-			// between new node and previously last element
-			// needs to be updated
+			// If merge is happening at the last element, then only pointer between new node and previously last element needs to be updated
 			else if (0 != childInsertPos && mergeInto.getChildren().get(childInsertPos - 1).getNext() == null) {
 				mergeInto.getChildren().get(childInsertPos).setPrev(mergeInto.getChildren().get(childInsertPos - 1));
 				mergeInto.getChildren().get(childInsertPos - 1).setNext(mergeInto.getChildren().get(childInsertPos));
 			}
-			// If merge is happening in between, then the next element and the
-			// previous element's prev and next pointers have to be updated
+			// If merge is happening in between, then the next element and the previous element's prev and next pointers have to be updated
 			else {
 				mergeInto.getChildren().get(childInsertPos)
 						.setNext(mergeInto.getChildren().get(childInsertPos - 1).getNext());
@@ -232,7 +189,6 @@ public class BPlusTree {
 				mergeInto.getChildren().get(childInsertPos).setPrev(mergeInto.getChildren().get(childInsertPos - 1));
 			}
 		}
-
 	}
 	
 	public int printTree() {
@@ -242,7 +198,7 @@ public class BPlusTree {
 		queue.add(null);
 		Node curr = null;
 		int levelNumber=2;
-		System.out.println("Printing level 1");
+		System.out.println("LEVEL 1: ");
 		while (!queue.isEmpty()) {
 			curr = queue.poll();
 			if (null == curr) {
@@ -250,13 +206,11 @@ public class BPlusTree {
 				if (queue.peek() == null) {
 					break;
 				}
-				System.out.println("\n" + "Printing level " + levelNumber++);
+				System.out.println("\n" + "LEVEL " + levelNumber++ + ": ");
 				continue;
 			}
-
 			printNode(curr);
 			numofNodes++;
-
 			if (curr.getChildren().isEmpty()) {
 				break;
 			}
@@ -266,21 +220,19 @@ public class BPlusTree {
 		}
 		curr = curr.getNext();
 		while (null != curr) {
-		
 			printNode(curr);
 			curr = curr.getNext();
 		}
-		System.out.println();
-		System.out.println("The height of the tree is " +(levelNumber-1));
-		
+		System.out.println("\nEND OF TREE");
+		heightOfTree = levelNumber -  1;
 		return numofNodes;
-		
 	}
-//	print the nodes of the tree
+
+	// print the nodes of the tree
 	private void printNode(Node curr) {
-	
 		for (int i = 0; i < curr.getKeys().size(); i++) {
-			System.out.print(curr.getKeys().get(i).getKey() + ":(");
+			System.out.print("|");
+			System.out.print(curr.getKeys().get(i).getKey());
 			String values = "";
 			for (int j = 0; j < curr.getKeys().get(i).getValues().size(); j++) {
 				values = values + curr.getKeys().get(i).getValues().get(j) + ",";
@@ -288,23 +240,10 @@ public class BPlusTree {
 			}
 			//System.out.print(values.isEmpty() ? ");" : values.substring(0, values.length() - 1) + ");");
 		}
-		System.out.print("||");
-		
-//		System.out.println("The number of nodes is "+counter);
+		System.out.print("| ");
+		// System.out.println("The number of nodes is "+counter);
 	}
 
-
-
-	/**
-	 * Modified Binary search within internal node.
-	 *
-	 * @param key
-	 *            the key to be searched
-	 * @param keyList
-	 *            the list of keys to be searched
-	 * @return the first index of the list at which the key which is greater
-	 *         than the input key
-	 */
 	public int binarySearchWithinInternalNode(float key, List<Keys> keyList) {
 		int st = 0;
 		int end = keyList.size() - 1;
@@ -314,8 +253,7 @@ public class BPlusTree {
 		if (key < keyList.get(st).getKey()) {
 			return 0;
 		}
-		// Return array size + 1 as the new positin of the key if greater than
-		// last element
+		// Return array size + 1 as the new positin of the key if greater thanlast element
 		if (key >= keyList.get(end).getKey()) {
 			return keyList.size();
 		}
@@ -338,92 +276,114 @@ public class BPlusTree {
 		return index;
 	}
 
-	/**
-	 * Search values for a key
-	 *
-	 * @param key
-	 *            the key to be searched
-	 * @return the list of values for the key
-	 */
 	public List<Records> search(float key) {
 		List<Records> searchValues = null;
-		int numNodes=0;
 		Node curr = this.root;
-		// Traverse to the corresponding external node that would 'should'
-		// contain this key
-		while (curr.getChildren().size() != 0) {
-			System.out.println("Is accessing nodes: "+ curr.getKeys());
-			numNodes++;
-			curr = curr.getChildren().get(binarySearchWithinInternalNode(key, curr.getKeys()));
+		int numOfNodesSearched = 1;
+		System.out.println("Printing the nodes accessed:");
+		System.out.print("Level "+numOfNodesSearched+" node: |");
+		for (Keys k : curr.getKeys()){
+			System.out.print(k.key+"|");
 		}
-		
+		// iterate thru keys in the node to find which key to access its pointer to get next node (child)
+		// repeat with the child node until we obtain the leaf node
+		while (curr.getChildren().size() != 0) {
+			int idx = binarySearchWithinInternalNode(key, curr.getKeys());
+			curr = curr.getChildren().get(idx);
+			System.out.println("\nAccessing right ptr of the "+idx+"th key of Level "+numOfNodesSearched+"...");
+			numOfNodesSearched++;
+			System.out.print("Level "+numOfNodesSearched+" node: |");
+			for (Keys k : curr.getKeys()){
+				System.out.print(k.key+"|");
+			}
+		}
+
+		// Obtain keys of the leaf node
 		List<Keys> keyList = curr.getKeys();
-		// Do a linear search in this node for the key. Set the parameter
-		// 'searchValues' only if success
+		// If key matches our target key, append its value to Records list
 		for (int i = 0; i < keyList.size(); i++) {
-//			print the nodes it is accessing
-			
 			if (key == keyList.get(i).getKey()) {
 				searchValues = keyList.get(i).getValues();
-				
-//				System.out.println("The node it is accessing is "+ searchValues);
-				System.out.println("The number of node it is accessing is "+ numNodes);
 			}
 			if (key < keyList.get(i).getKey()) {
 				break;
 			}
 		}
-
+		System.out.println("\n\n=> The number of nodes accessed = " + numOfNodesSearched);
 		return searchValues;
+	}
+
+	public int getNumOfBlocksAccessed(List<Records> searchValues, Disk disk){
+		int numBlocksAccessed = 0;
+		boolean isBlockAccessed;
+		for (Records r : searchValues){
+			for (Blocks b : disk.diskBlocks){
+				isBlockAccessed = false;
+				for (Records records : b.recordlist){
+					if (r == records){
+						if (!isBlockAccessed) {
+							isBlockAccessed = true;
+							numBlocksAccessed++;
+							break;
+						}	
+						else{
+							break;
+						}
+					}
+				}
+			}
+		}
+		return numBlocksAccessed;
 	}
 	
 
 	/**
-	 * Search for all key values pairs between key1 and key2.
+	 * Search for all key values pairs between key1 and key2
 	 *
-	 * @param key1
-	 *            the starting key
-	 * @param key2
-	 *            the ending key
-	 * @return the list of key value pairs between the two keys
+	 * @param key1 - the starting key
+	 * @param key2 - the ending key
+	 * @return list of key value pairs between the two keys
 	 */
 	public List<Keys> search(float key1, float key2) {
 		//System.out.println("Searching between keys " + key1 + ", " + key2);
 		List<Keys> searchKeys = new ArrayList<>();
 		Node currNode = this.root;
-		int rangeNode=0;
-		// Traverse to the corresponding external node that would 'should'
-		// contain starting key (key1)
+		int numOfNodesSearched = 1;
+
 		while (currNode.getChildren().size() != 0) {
 			System.out.println("Is accessing nodes: "+ currNode.getKeys());
-			rangeNode++;
+			numOfNodesSearched++;
 			currNode = currNode.getChildren().get(binarySearchWithinInternalNode(key1, currNode.getKeys()));
 		}
-		
-		// Start from current node and add keys whose value lies between key1 and key2 with their corresponding pairs
-		// Stop if end of list is encountered or if value encountered in list is greater than key2
 		
 		boolean endSearch = false;
 		while (null != currNode && !endSearch) {
 			for (int i = 0; i < currNode.getKeys().size(); i++) {
 				if (currNode.getKeys().get(i).getKey() >= key1 && currNode.getKeys().get(i).getKey() <= key2)
-					
 					searchKeys.add((currNode.getKeys().get(i)));
-				
 				if (currNode.getKeys().get(i).getKey() > key2) {
 					endSearch = true;
 				}
 			}
 			currNode = currNode.getNext();
 		}
-
 		return searchKeys;
 	}
 
-	// public List<Records> retrieveTconstantwithAverageRating(int avgRating)
-	// {
-	// 	List<Records> searchValues = null;
-	// 	return searchValues;
-	// }
-
+	// Build a tree from a disk
+	public void buildTreeWithFromDisk(Disk disk){
+		for (Blocks b : disk.diskBlocks){
+			for(Records r : b.recordlist){
+				ByteArray br = r.diskRecord.recordArray;
+				br.setPos(0);              
+				ByteArray header = br.readBytes(new byte[4]);
+				String tconst = br.readString();
+				float averageRating = br.readFloat();
+				int numVotes = br.readInt();
+				br.setPos(0);              
+				this.insert(averageRating, r);
+				this.numofNodes++;
+			}
+		}
+	}
 }

@@ -3,14 +3,10 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-
     public static int counter=0;
     static Scanner input = new Scanner(System.in);
-    
-    
 
     public static void main(String[] args) {
-    
         // Main Menu
         int first_option;
         do {
@@ -19,24 +15,21 @@ public class Main {
                 "1. Set block size to 100 B\n" + 
                 "2. Set block size to 500 B\n" +
                 "0. Exit"
-                );
+            );
             first_option = input.nextInt();
             switch(first_option){
-                case 1:    
+            case 1:    
                 // initialize block size = 100 B
-                    runExperiments(100);
+                runExperiments(100);
                 break;
-
-                case 2:
+            case 2:
                 // initialize block size = 500 B
-                    runExperiments(500);
+                runExperiments(500);
                 break;
-
-                case 0:
+            case 0:
                 // terminate
                 break;
-
-                default:
+            default:
                 System.out.println("Invalid option! Please try again.");
                 break;
             }
@@ -44,13 +37,13 @@ public class Main {
         while(first_option != 0);        
     }
 
-    private static void runExperiments(int blocksize) {
+    private static void runExperiments(int blockSize) {
         int second_option;
-        int n = blocksize/4;
-        BPlusTree tree = new BPlusTree(n);
-        List<Blocks> blo = new ArrayList<Blocks>();
-        FileIO.readTSV("data.tsv", tree, blo);
-        
+        int n = blockSize/4; // assuming 1 keypair takes up 4B
+        BPlusTree bPlusTree;
+
+        Disk disk = new Disk(blockSize);
+        disk.readTSV("data(30k).tsv");
         do {
             System.out.println(
                 "Enter one of the following numbers:\n" + 
@@ -58,130 +51,86 @@ public class Main {
                 "2) Run Experiment 2\n" +
                 "3) Run Experiment 3\n" +
                 "4) Run Experiment 4\n" +
-                "5) Run Experiment 5\n" +
+                // "5) Run Experiment 5\n" +
                 "0 to change block size");
             second_option = input.nextInt();
             switch(second_option){
-                case 1:
-                // run Exp 1
-                    System.out.println("--------------------Experiment 1 and 2----------------------");
-                   
-
-                    // one data block is equal to 100
-                    System.out.println("The number of blocks "+ blo.size());
-                    System.out.println("The size of database "+blo.size()*100);
-                    
-
-                   
+            case 1:
+                System.out.println("--------------------Experiment 1----------------------"); 
+                System.out.println("=> The number of blocks = "+ disk.diskBlocks.size());
+                System.out.println("=> The size of database = "+ disk.getTotalBytes() + " bytes");
+                System.out.println("------------------------End---------------------------\n"); 
                 break;
-
-                case 2:
-                // run Exp 2
-                System.out.println("run ex 2");
-                tree.printTree();
+            case 2:
+                System.out.println("--------------------Experiment 2----------------------"); 
+                // Insert records into Tree
+                bPlusTree = new BPlusTree(n);
+                bPlusTree.buildTreeWithFromDisk(disk);
+                bPlusTree.printTree();
+                System.out.println("\n=> The parameter n = "+ n);
+                System.out.println("=> The number of nodes = "+ bPlusTree.numofNodes);
+                System.out.println("=> The height of tree = "+ bPlusTree.heightOfTree);
+                System.out.println("------------------------End---------------------------\n"); 
                 break;
-
-                case 3:
-                // run Expr 3
-                System.out.println("run ex 3");
-               
-    		    
-    			List<Records> tconstValue= tree.search(8);
-    			for(int i= 0; i<tconstValue.size();i++)
-    			{
-    				//limit the max output to be 20 entries due to the huge amount of data
-    				
-    					//printing of tconst value
-    					System.out.println(" The t constant value is " + tconstValue.get(i).tconstant);
-    			
-    			}
-//    			Print out the number of blocks and the block data
-    			int blockCounter=0;
-    			for(int j=0; j<blo.size();j++)
-    			{
-    				//put the block into the dataBlo arraylist
-    				List<Records> dataBlo =	blo.get(j).recordlist;
-    				
-    				for(int a=0;a<dataBlo.size();a++)
-    				{
-    					if(dataBlo.get(a).averagerating==8)
-    					{
-    						blockCounter++;
-    						
-    						for(int b=0; b<dataBlo.size();b++)
-    						{
-    									
-    							Records r = dataBlo.get(b);
-    							System.out.println(" The block data it accessing is "+"Tconst : "+ r.tconstant + " Average Rating:  "+ r.averagerating + " Number of votes : "+ r.numofvote);
-    							
-    						}
-    						break;
-    
-    					}
-    				}
-    			}
-    			
-    			System.out.println("Number of blocks: " + blockCounter);
+            case 3:
+                System.out.println("--------------------Experiment 3----------------------"); 
+                // Retrieve tconst for averageRating==8.0
+                // Find number of index nodes and show all index nodes processed
+                // Find number of data blocks and show all data blocks processed
+                bPlusTree = new BPlusTree(n);
+                bPlusTree.buildTreeWithFromDisk(disk);
+                List<Records> recordsObtained = bPlusTree.search(8);
+                System.out.println("\nPrinting tconst of the key 8.0:");
+                for (Records r : recordsObtained){
+                    System.out.print(r.tconstant+",");
+                }
+                int numBlocks = bPlusTree.getNumOfBlocksAccessed(recordsObtained, disk);
+                System.out.println("\n\n=> The number of blocks accessed = "+numBlocks);
+                System.out.println("------------------------End---------------------------\n"); 
                 break;
-
-                case 4:
-                // run Expr 4
-                    System.out.println("------Experiment 4--------------");
-                    int rangeCounter=0;
-                    List<Keys> test= tree.search(7,9); 
-                    for(int d=0; d<test.size(); d++){
-                    	  Keys keys = test.get(d);
-                              float key = keys.key;
-                              
-                              	 List<Records> records = keys.values;
-                                   
-                                       System.out.println("key,");
-                                       for (Records record : records)
-                                       {
-                                    	   
-                                    	   System.out.println("Tconst is "+record.tconstant);
-                                       
-                                    	   rangeCounter++;
-                                       }
-
-
+            case 4:
+                System.out.println("--------------------Experiment 4----------------------"); 
+                int rangeCounter=0;
+                bPlusTree = new BPlusTree(n);
+                bPlusTree.buildTreeWithFromDisk(disk);
+                List<Keys> test= bPlusTree.search(7,9); 
+                // print nodes accessed with the key and values                
+                for(int d=0; d<test.size(); d++){
+                    Keys keys = test.get(d);
+                    float key = keys.key;
+                    List<Records> records = keys.values;
+                    System.out.println("\nFor key "+records.get(0).averagerating+" the tconst are:");
+                    for (Records record : records){
+                        System.out.print(record.tconstant+",");
+                        rangeCounter++;
                     }
-                    int blockSize=0;
-                    int printNum=1;
-               
-                    for(int g=0; g< blo.size();g++)
-                    {
-                    	List<Records> rangeBlo =blo.get(g).recordlist;
-        				
-        				for(int a=0;a<rangeBlo.size();a++)
-        				{
-        				
-        					if(rangeBlo.get(a).averagerating >= 7.0f && rangeBlo.get(a).averagerating <=9.0f)
-        					{
-        						blockSize++;
-        						
-        							for(int b=0; b<rangeBlo.size();b++)
-            						{
-            						
-            								Records r = rangeBlo.get(b);
-                							System.out.println(" The block data it accessing is "+"Tconst : "+ r.tconstant + " Average Rating:  "+ r.averagerating + " Number of votes : "+ r.numofvote);
-                							printNum++;
-
-            						}
-
-        						break;
-        					}
-        				}
-        				
+                }
+                int blockNum=0;
+                int printNum=1;
+                for(int g=0; g< disk.diskBlocks.size();g++){
+                    List<Records> rangeBlo = disk.diskBlocks.get(g).recordlist;
+                    for(int a=0;a<rangeBlo.size();a++){
+                        if(rangeBlo.get(a).averagerating >= 7.0f && rangeBlo.get(a).averagerating <=9.0f){
+                            blockNum++;
+                            for(int b=0; b<rangeBlo.size();b++){
+                                Records r = rangeBlo.get(b);
+                                // System.out.println(" The block data it accessing is "+"Tconst : "+ r.tconstant + " Average Rating:  "+ r.averagerating + " Number of votes : "+ r.numofvote);
+                                printNum++;
+                            }
+                            break;
+                        }
                     }
-                    System.out.println("Number of blocks: "+ blockSize);
+                }
+                System.out.println("\n\n=> Number of nodes accessed = " + rangeCounter);
+                System.out.println("=> Number of blocks accessed = " + blockNum);
+                System.out.println("------------------------End---------------------------\n"); 
                 break;
-                case 5:
-                // run Expr 5
-                System.out.println("run ex 5");
-                
+            // case 5:
+            //     System.out.println("--------------------Experiment 5----------------------"); 
+            //     break;
+            default:
                 break;
-            }
+            }          
         } while (second_option != 0);
     }
 }

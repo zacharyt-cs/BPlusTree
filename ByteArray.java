@@ -159,7 +159,7 @@ public final class ByteArray {
    // Added by Elroy github@gitteroy
    public String readString() {
       StringBuilder sb = new StringBuilder();
-      for (int i=0; i<9; i++){
+      for (int i=0; i<10; i++){
          sb.append(readChar());
       }
       return sb.toString();
@@ -262,8 +262,14 @@ public final class ByteArray {
    // Added by Elroy github@gitteroy
    public ByteArray writeString(String str){
       char[] arr = str.toCharArray();
+      int len = arr.length;
       for (char c : arr){
          writeChar(c);
+      }
+      if (len < 10){
+         for (int i=len; i<10; i++){
+            writeChar(' ');
+         }
       }
       return this;
    }

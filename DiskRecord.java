@@ -1,11 +1,11 @@
 public class DiskRecord {
-    // Fixed Record length of 30B
+    // Fixed Record length of 32B
     ByteArray recordArray;
     boolean isEmpty;
-    int numBytes = 30;
+    int numBytes = 32;
 
     public DiskRecord(){
-        this.recordArray = new ByteArray(30);   // Initialise a record as ByteArray of fixed size 30B
+        this.recordArray = new ByteArray(32);   // Initialise a record as ByteArray of fixed size 30B
         this.isEmpty = true;
     }
 
@@ -14,7 +14,7 @@ public class DiskRecord {
         else this.isEmpty = false;
         ByteArray r = this.recordArray;
         r.writeBytes(record.header);            // write header into record (fixed size 4B)
-        r.writeString(record.tconstant);        // write tconst into record (fixed size 18B)
+        r.writeString(record.tconstant);        // write tconst into record (fixed size 20B)
         r.writeFloat(record.averagerating);     // write averageRating into record (fixed size 4B)
         r.writeInt(record.numofvote);           // write numVotes into record (fixed size 4B)
     }
@@ -36,5 +36,5 @@ public class DiskRecord {
  * char = 2
  * int = 4
  * float = 4
- * double
+ * double = 8
  */

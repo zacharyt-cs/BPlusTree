@@ -4,7 +4,6 @@ import java.util.List;
 public class Keys {
 	float key;
 
-	/** The list of values for the key. Set only for external nodes*/
 	List<Records> values;
 
 	// Instantiates a new key and its value.
@@ -37,12 +36,6 @@ public class Keys {
 		return values;
 	}
 
-	/**
-	 * Sets the values.
-	 *
-	 * @param values
-	 *            the new values
-	 */
 	public void setValues(List<Records> values) {
 		this.values = values;
 	}

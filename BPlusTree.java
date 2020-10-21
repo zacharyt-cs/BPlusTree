@@ -78,10 +78,10 @@ public class BPlusTree {
 	/**
 	 * Split node when adding key into full node
 	 * @param curr
-	 * @param m
+	 * @param n
 	 */
-	private void splitExternalNode(Node curr, int m) {
-		int midIndex = m / 2;
+	private void splitExternalNode(Node curr, int n) {
+		int midIndex = n / 2;
 		Node middle = new Node();
 		Node rightPart = new Node();
 
@@ -102,7 +102,7 @@ public class BPlusTree {
 		boolean firstSplit = true;
 		// propogate the middle element up the tree and merge with parent of
 		// previously overfull node
-		splitInternalNode(curr.getParent(), curr, m, middle, firstSplit);
+		splitInternalNode(curr.getParent(), curr, n, middle, firstSplit);
 
 	}
 	
@@ -110,11 +110,11 @@ public class BPlusTree {
 	 * 
 	 * @param curr
 	 * @param prev
-	 * @param m
+	 * @param n
 	 * @param toBeInserted
 	 * @param firstSplit
 	 */
-	private void splitInternalNode(Node curr, Node prev, int m, Node toBeInserted, boolean firstSplit) {
+	private void splitInternalNode(Node curr, Node prev, int n, Node toBeInserted, boolean firstSplit) {
 		if (null == curr) {
 			// if we split the root before, then a new root has to be created
 			this.root = toBeInserted;
@@ -138,9 +138,9 @@ public class BPlusTree {
 		} else {
 			// merge the internal node with the mid + right of previous split
 			mergeInternalNodes(toBeInserted, curr);
-			if (curr.getKeys().size() == m) {
+			if (curr.getKeys().size() == n) {
 				// do a split again if the internal node becomes full
-				int midIndex = (int) Math.ceil(m / 2.0) - 1;
+				int midIndex = (int) Math.ceil(n / 2.0) - 1;
 				Node middle = new Node();
 				Node rightPart = new Node();
 
@@ -179,7 +179,7 @@ public class BPlusTree {
 				curr.getKeys().subList(midIndex, curr.getKeys().size()).clear();
 
 				// propogate split one level up
-				splitInternalNode(curr.getParent(), curr, m, middle, false);
+				splitInternalNode(curr.getParent(), curr, n, middle, false);
 			}
 		}
 	}
@@ -420,10 +420,15 @@ public class BPlusTree {
 		return searchKeys;
 	}
 
-	// public List<Records> retrieveTconstantwithAverageRating(int avgRating)
-	// {
-	// 	List<Records> searchValues = null;
-	// 	return searchValues;
-	// }
+	// for deletion
+	public void delete(Keys keys) {
+		
+	}
+	public int deleteHelper(Node parentNode, Node node, int key){
+
+	}
+	public int deleteLeafNode() {
+
+	}
 
 }

@@ -1,49 +1,51 @@
-import java.util.ArrayList;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-    public static int counter=0;
+    public static int counter = 0;
     static Scanner input = new Scanner(System.in);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // Main Menu
         int first_option;
         do {
-            System.out.println(
-                "Enter one of the following numbers\n" + 
-                "1. Set block size to 100 B\n" + 
-                "2. Set block size to 500 B\n" +
-                "0. Exit"
-            );
+            System.out.println("Enter one of the following numbers\n" + "1. Set block size to 100 B\n"
+                    + "2. Set block size to 500 B\n" + "0. Exit");
             first_option = input.nextInt();
-            switch(first_option){
-            case 1:    
-                // initialize block size = 100 B
-                runExperiments(100);
-                break;
-            case 2:
-                // initialize block size = 500 B
-                runExperiments(500);
-                break;
-            case 0:
-                // terminate
-                break;
-            default:
-                System.out.println("Invalid option! Please try again.");
-                break;
+            switch (first_option) {
+                case 1:
+                    // initialize block size = 100 B
+                    runExperiments(100);
+                    break;
+                case 2:
+                    // initialize block size = 500 B
+                    runExperiments(500);
+                    break;
+                case 0:
+                    // terminate
+                    break;
+                default:
+                    System.out.println("Invalid option! Please try again.");
+                    break;
             }
-        }
-        while(first_option != 0);        
+        } while (first_option != 0);
     }
 
-    private static void runExperiments(int blockSize) {
+    private static void runExperiments(int blockSize) throws IOException {
         int second_option;
         int n = blockSize/4; // assuming 1 keypair takes up 4B
         BPlusTree bPlusTree;
 
         Disk disk = new Disk(blockSize);
-        disk.readTSV("data(30k).tsv");
+        // disk.readTSV("data(30k).tsv");
+        disk.readTSV("data.tsv");
         do {
             System.out.println(
                 "Enter one of the following numbers:\n" + 
@@ -80,9 +82,12 @@ public class Main {
                 bPlusTree = new BPlusTree(n);
                 bPlusTree.buildTreeWithFromDisk(disk);
                 List<Records> recordsObtained = bPlusTree.search(8);
-                System.out.println("\nPrinting tconst of the key 8.0:");
-                for (Records r : recordsObtained){
-                    System.out.print(r.tconstant+",");
+                System.out.println("Please refer to Experiment_3.txt for the tconst of the key 8.0");
+                try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("Experiment_3"), "utf-8"))) {
+                    for (Records r : recordsObtained){
+                        writer.write(r.tconstant+",");
+                        }
+                    writer.close();
                 }
                 int numBlocks = bPlusTree.getNumOfBlocksAccessed(recordsObtained, disk);
                 System.out.println("\n\n=> The number of blocks accessed = "+numBlocks);
@@ -99,11 +104,18 @@ public class Main {
                     Keys keys = test.get(d);
                     float key = keys.key;
                     List<Records> records = keys.values;
-                    System.out.println("\nFor key "+records.get(0).averagerating+" the tconst are:");
-                    for (Records record : records){
-                        System.out.print(record.tconstant+",");
-                        rangeCounter++;
-                    }
+                    // System.out.println("\nFor key "+records.get(0).averagerating+" the tconst are:");
+                    // for (Records record : records){
+                    //     System.out.print(record.tconstant+",");
+                    //     rangeCounter++;
+                    // }
+                    System.out.println("Please refer to Experiment_4.txt for the tconst of the key "+records.get(0).averagerating);
+                    try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("Experiment_4"), "utf-8"))) {
+                        for (Records record : records){
+                            writer.write(record.tconstant+",");
+                            rangeCounter++;
+                            }
+                    }    
                 }
                 int blockNum=0;
                 int printNum=1;

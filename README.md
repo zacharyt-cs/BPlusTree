@@ -48,7 +48,7 @@ following statistics:
 
 Function 5: Re-set the block size to be 500 B and re-do Function 1-4.
 
-Data
+## Data
 
 The data contains the IMDb rating and votes information for movies
 - tconst (string) – alphanumeric unique identifier of the title
@@ -77,7 +77,9 @@ Add a file structure here with the basic details about files, below is an exampl
 In some cases, running main.java with the full dataset will result in heap overflow.
 
 ##  Gallery
-- to be added -
+| Menu     | Example     |
+|------------|-------------|
+| <img src="img/main.jpg" width="400"> | <img src="img/exp2.png" width="400"> |
 
 ## Credit/Acknowledgment
 Collaborated with @gitteroy and @EvoYX
